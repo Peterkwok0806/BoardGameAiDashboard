@@ -1,0 +1,69 @@
+# Cline 最高指導原則
+
+## 1. 任務初始化 (必做)
+每次接受新任務時：
+- 第一步必須使用 `read_file` 研讀 `architecture.md`、`skills.md`、`todo.md`
+- 嚴禁未讀這三個檔案就猜測架構或直接撰寫程式碼
+
+## 2. 專案路徑速查 (禁止亂放檔案)
+```
+Solution:       BoardGameAiDashboard/BoardGameAiDashboard.sln
+Domain:         BoardGameAiDashboard/BoardGameAiDashboard.Domain/
+Application:    BoardGameAiDashboard/BoardGameAiDashboard.Application/
+Infrastructure: BoardGameAiDashboard/BoardGameAiDashboard.Infrastructure/
+Api:            BoardGameAiDashboard/BoardGameAiDashboard.Api/
+Tests (future): BoardGameAiDashboard.Tests/
+```
+- **依賴方向**：Domain ← Application ← Infrastructure ← Api
+- 嚴禁反向依賴或跨層依賴（例如 Domain 引用 Infrastructure）
+- 新增任何檔案前，先確認放在正確的層級目錄
+
+## 3. 語言規範
+- C# 程式碼、類別名、方法名、變數名：全部英文（PascalCase 類別/方法，camelCase 欄位/參數）
+- XML 註解：英文
+- `architecture.md` / `todo.md` / `skills.md` 文件：可中英混用
+- UI 顯示文字：可中文（但需考慮未來 i18n）
+
+## 4. 程式碼品質 (硬性要求)
+1. **軟刪除**：所有 EF Core 查詢自動加 `!IsDeleted` 過濾，嚴禁遺漏
+2. **非同步**：所有後端資料讀寫與 API 一律使用 `async/await`，嚴禁使用 `.Result` 或 `.Wait()`
+3. **回應格式**：API 成功回應必須統一打包為 `ApiResult<T>`；錯誤時嚴格遵循 `ProblemDetails` (RFC 7807)
+4. **效能**：讀取查詢優先使用 `AsNoTracking()`；需要防 Race Condition 時使用 `UPDLOCK`
+5. **批次操作**：優先使用 `ExecuteUpdateAsync` / `ExecuteDeleteAsync`，避免逐筆迴圈更新
+6. **JSON 欄位**：已建好 `ValueConverter` + `ValueComparer`，模型一律使用 `Dictionary<string, string>`
+
+## 5. 架構規範 (Clean Architecture 四層)
+1. **Domain 層**：零外部 NuGet 依賴，僅用 `System.*` + Domain 聚合根/實體
+2. **Application 層**：MediatR (CQRS)、FluentValidation、AutoMapper、介面定義（IGenericRepository、IUnitOfWork）
+3. **Infrastructure 層**：EF Core、SemanticKernel、Qdrant.Client、ML.NET、Redis、Hangfire、JwtBearer
+4. **Api 層**：Controller、Middleware、Swagger (Swashbuckle)、SignalR Hub
+5. 新增 NuGet 套件前，先確認該套件屬於哪一層（參見 `architecture.md` Section 4）
+
+## 6. AI/RAG 特殊規則 (本專案核心功能)
+1. RAG 為本專案核心功能，優先開發
+2. LLM 編排一律使用 **Semantic Kernel**，嚴禁直接發送 raw HTTP call 到 OpenAI
+3. 向量搜尋必須包含 **metadata filtering**（GameId、SectionTitle）
+4. 文件 ingestion 必須執行 **chunk → embed → store** 流程，嚴禁整份 PDF 丟進 LLM context
+5. 回應支援粵語/中文/英文，依使用者語言自動切換
+6. 所有 RAG 查詢與回應需 structured logging（Serilog）以利除錯與改善
+
+## 7. Angular 前端規範
+1. 使用 Angular 19 **Standalone Components**（不使用 NgModules）
+2. 狀態管理優先使用 **Angular Signals**
+3. 樣式使用 **Tailwind CSS** utility-first
+4. HTTP 攔截器（Interceptor）統一處理 `ApiResult<T>` 回應 + JWT Token 自動附加
+5. 表單使用 **Reactive Forms** + **FluentValidation** 對應
+6. 資料視覺化使用 **ng2-charts** (Chart.js)
+7. 確認對話框使用 **SweetAlert2**
+
+## 8. 戰術看板 (Todo) 維護 SOP
+1. 開始寫程式前，先在 `todo.md` 更新作戰計畫，將任務細拆為多個 `[ ]` 項目
+2. 每完成一個進度（例如：寫完 Service、通過 xUnit 測試、完成 migration），主動使用 `write_to_file` 或 `patch_file` 更新 `todo.md` 打勾 `[x]`
+3. 遇到阻礙（Race Condition、缺少依賴、設計爭議），更新在「🛑 目前阻礙」區塊並向人類提問
+4. 每次任務完成後，同步更新 `todo.md` 的「📊 Overall Progress」表格百分比
+
+## 9. 測試規範
+1. **Unit Test**：xUnit + Moq，測 CQRS Handler 邏輯與驗證行為
+2. **Integration Test**：`WebApplicationFactory` + InMemory EF Core Provider
+3. **E2E Test**：Playwright（關鍵用戶流程）
+4. 每個功能 PR 至少包含對應 Handler 的 Unit Test

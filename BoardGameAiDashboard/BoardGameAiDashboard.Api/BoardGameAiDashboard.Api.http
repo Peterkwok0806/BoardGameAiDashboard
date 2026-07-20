@@ -1,0 +1,6 @@
+@BoardGameAiDashboard.Api_HostAddress = http://localhost:5032
+
+GET {{BoardGameAiDashboard.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

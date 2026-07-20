@@ -1,0 +1,253 @@
+## =====================================================================
+## BoardGame AI Dashboard — .gitignore
+## Stack: .NET 8 + Angular 19 + SQL Server + Qdrant + Redis + Azure OpenAI
+## =====================================================================
+
+## ---------------------------------------------------------------
+## .NET / C# / ASP.NET Core
+## ---------------------------------------------------------------
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+bld/
+[Ll]og/
+[Ll]ogs/
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.fragment.lock.json
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+*.userprefs
+launchSettings.json.user
+
+# StyleCop
+StyleCopReport.xml
+
+# Build results
+[Dd]ebugPublic/
+[Rr]eleases/
+*.[Pp]ublish.xml
+*.azurePubxml
+*.pubxml
+!*.[Pp]ubxml.user
+
+# VS Build Results
+*.VisualState.xml
+TestResult.xml
+
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+*.DotSettings
+
+# CodeRush
+.cr/
+
+# NCrunch
+_NCrunch_*
+.*crunch*.local.xml
+nCrunchTemp_*
+
+# MFractors
+.mfractor/
+
+## ---------------------------------------------------------------
+## Visual Studio Code
+## ---------------------------------------------------------------
+# Keep shared workspace settings
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+# Ignore personal settings
+.vscode/settings.json
+.vscode/*.code-workspace
+
+## ---------------------------------------------------------------
+## Angular / Frontend (Node.js)
+## ---------------------------------------------------------------
+node_modules/
+.angular/
+dist/
+tmp/
+out-tgt/
+sass-cache/
+connect.lock
+libpeerconnection.log
+*.js.map
+*.jsbundle
+
+# Angular build output
+www/
+browser/
+server/
+
+# Coverage
+coverage/
+lcov.info
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment files
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+
+## ---------------------------------------------------------------
+## TypeScript
+## ---------------------------------------------------------------
+*.tsbuildinfo
+
+## ---------------------------------------------------------------
+## Secrets & Local Configuration
+## ---------------------------------------------------------------
+# appsettings with secrets (keep appsettings.json and appsettings.Production.json)
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.Local.json
+appsettings.*.Development.json
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
+# User Secrets
+secrets.json
+Properties/serviceDependencies.json
+
+## ---------------------------------------------------------------
+## Entity Framework Core
+## ---------------------------------------------------------------
+# Do NOT ignore Migrations/ — they must be tracked in source control
+
+## ---------------------------------------------------------------
+## ML.NET / ONNX Models (large binary files)
+## ---------------------------------------------------------------
+*.onnx
+*.zip
+!BoardGameAiDashboard/BoardGameAiDashboard.Infrastructure/Services/Ml/Models/.gitkeep
+
+## ---------------------------------------------------------------
+## Docker (ignore runtime data, keep config files)
+## ---------------------------------------------------------------
+# docker-compose.override.yml is local-only
+docker-compose.override.yml
+
+# Docker volume data
+docker-data/
+docker-volumes/
+
+## ---------------------------------------------------------------
+## Qdrant (local vector DB data)
+## ---------------------------------------------------------------
+qdrant_data/
+qdrant_storage/
+
+## ---------------------------------------------------------------
+## Redis
+## ---------------------------------------------------------------
+dump.rdb
+appendonly.aof
+redis.conf
+
+## ---------------------------------------------------------------
+## Hangfire (jobs database is SQL Server, but ignore temp files)
+## ---------------------------------------------------------------
+*.hangfire
+
+## ---------------------------------------------------------------
+## Logs & Temp Files
+## ---------------------------------------------------------------
+logs/
+*.log
+*.pid
+*.pid.*
+*.seed
+*.pid.lock
+nlog-*.txt
+
+# Seq data
+seq-data/
+
+## ---------------------------------------------------------------
+## OS Files
+## ---------------------------------------------------------------
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+
+# Linux
+*~
+
+## ---------------------------------------------------------------
+## Miscellaneous
+## ---------------------------------------------------------------
+*.swp
+*.swo
+*.bak
+*.tmp
+*.orig
+*.rej
+.cache/
+*.cache
+~$*
+
+# Compiled files
+*.dll
+*.exe
+*.pdb
+*.cache
+
+# Test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+TestResult.xml
+
+# NuGet
+*.nupkg
+
+# MSBuild
+*.metaproj
+*.metaproj.tmp

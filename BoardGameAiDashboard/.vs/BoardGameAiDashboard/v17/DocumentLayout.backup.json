@@ -1,0 +1,190 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\AiBoardgameDashboard\\BoardGameAiDashboard\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{D0B688A2-BA44-4761-B8AC-AC3EF73E2E20}|BoardGameAiDashboard.Api\\BoardGameAiDashboard.Api.csproj|c:\\aiboardgamedashboard\\boardgameaidashboard\\boardgameaidashboard.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{D0B688A2-BA44-4761-B8AC-AC3EF73E2E20}|BoardGameAiDashboard.Api\\BoardGameAiDashboard.Api.csproj|solutionrelative:boardgameaidashboard.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\AiBoardgameDashboard\\BoardGameAiDashboard\\BoardGameAiDashboard.Infrastructure\\Migrations\\20260714115215_InitialCreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:BoardGameAiDashboard.Infrastructure\\Migrations\\20260714115215_InitialCreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4D4D2D49-EB75-46AE-A87E-1D611375CEF0}|BoardGameAiDashboard.Infrastructure\\BoardGameAiDashboard.Infrastructure.csproj|c:\\aiboardgamedashboard\\boardgameaidashboard\\boardgameaidashboard.infrastructure\\persistence\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4D4D2D49-EB75-46AE-A87E-1D611375CEF0}|BoardGameAiDashboard.Infrastructure\\BoardGameAiDashboard.Infrastructure.csproj|solutionrelative:boardgameaidashboard.infrastructure\\persistence\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A174BC60-C0E7-49D9-A069-39E24AE1CCCE}|BoardGameAiDashboard.Domain\\BoardGameAiDashboard.Domain.csproj|c:\\aiboardgamedashboard\\boardgameaidashboard\\boardgameaidashboard.domain\\entities\\matchhistory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A174BC60-C0E7-49D9-A069-39E24AE1CCCE}|BoardGameAiDashboard.Domain\\BoardGameAiDashboard.Domain.csproj|solutionrelative:boardgameaidashboard.domain\\entities\\matchhistory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A174BC60-C0E7-49D9-A069-39E24AE1CCCE}|BoardGameAiDashboard.Domain\\BoardGameAiDashboard.Domain.csproj|c:\\aiboardgamedashboard\\boardgameaidashboard\\boardgameaidashboard.domain\\entities\\gamerulechunk.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A174BC60-C0E7-49D9-A069-39E24AE1CCCE}|BoardGameAiDashboard.Domain\\BoardGameAiDashboard.Domain.csproj|solutionrelative:boardgameaidashboard.domain\\entities\\gamerulechunk.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A174BC60-C0E7-49D9-A069-39E24AE1CCCE}|BoardGameAiDashboard.Domain\\BoardGameAiDashboard.Domain.csproj|c:\\aiboardgamedashboard\\boardgameaidashboard\\boardgameaidashboard.domain\\entities\\gamecharacter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A174BC60-C0E7-49D9-A069-39E24AE1CCCE}|BoardGameAiDashboard.Domain\\BoardGameAiDashboard.Domain.csproj|solutionrelative:boardgameaidashboard.domain\\entities\\gamecharacter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A174BC60-C0E7-49D9-A069-39E24AE1CCCE}|BoardGameAiDashboard.Domain\\BoardGameAiDashboard.Domain.csproj|c:\\aiboardgamedashboard\\boardgameaidashboard\\boardgameaidashboard.domain\\entities\\gamecard.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A174BC60-C0E7-49D9-A069-39E24AE1CCCE}|BoardGameAiDashboard.Domain\\BoardGameAiDashboard.Domain.csproj|solutionrelative:boardgameaidashboard.domain\\entities\\gamecard.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A174BC60-C0E7-49D9-A069-39E24AE1CCCE}|BoardGameAiDashboard.Domain\\BoardGameAiDashboard.Domain.csproj|c:\\aiboardgamedashboard\\boardgameaidashboard\\boardgameaidashboard.domain\\entities\\game.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A174BC60-C0E7-49D9-A069-39E24AE1CCCE}|BoardGameAiDashboard.Domain\\BoardGameAiDashboard.Domain.csproj|solutionrelative:boardgameaidashboard.domain\\entities\\game.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\AiBoardgameDashboard\\BoardGameAiDashboard\\BoardGameAiDashboard.Infrastructure\\Migrations\\20260714100729_InitialCreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:BoardGameAiDashboard.Infrastructure\\Migrations\\20260714100729_InitialCreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D0B688A2-BA44-4761-B8AC-AC3EF73E2E20}|BoardGameAiDashboard.Api\\BoardGameAiDashboard.Api.csproj|c:\\aiboardgamedashboard\\boardgameaidashboard\\boardgameaidashboard.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D0B688A2-BA44-4761-B8AC-AC3EF73E2E20}|BoardGameAiDashboard.Api\\BoardGameAiDashboard.Api.csproj|solutionrelative:boardgameaidashboard.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "20260714115215_InitialCreate.cs",
+              "DocumentMoniker": "C:\\AiBoardgameDashboard\\BoardGameAiDashboard\\BoardGameAiDashboard.Infrastructure\\Migrations\\20260714115215_InitialCreate.cs",
+              "RelativeDocumentMoniker": "BoardGameAiDashboard.Infrastructure\\Migrations\\20260714115215_InitialCreate.cs",
+              "ToolTip": "C:\\AiBoardgameDashboard\\BoardGameAiDashboard\\BoardGameAiDashboard.Infrastructure\\Migrations\\20260714115215_InitialCreate.cs",
+              "RelativeToolTip": "BoardGameAiDashboard.Infrastructure\\Migrations\\20260714115215_InitialCreate.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-14T11:52:15.951Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "GameCard.cs",
+              "DocumentMoniker": "C:\\AiBoardgameDashboard\\BoardGameAiDashboard\\BoardGameAiDashboard.Domain\\Entities\\GameCard.cs",
+              "RelativeDocumentMoniker": "BoardGameAiDashboard.Domain\\Entities\\GameCard.cs",
+              "ToolTip": "C:\\AiBoardgameDashboard\\BoardGameAiDashboard\\BoardGameAiDashboard.Domain\\Entities\\GameCard.cs",
+              "RelativeToolTip": "BoardGameAiDashboard.Domain\\Entities\\GameCard.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-14T11:36:28.365Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "GameCharacter.cs",
+              "DocumentMoniker": "C:\\AiBoardgameDashboard\\BoardGameAiDashboard\\BoardGameAiDashboard.Domain\\Entities\\GameCharacter.cs",
+              "RelativeDocumentMoniker": "BoardGameAiDashboard.Domain\\Entities\\GameCharacter.cs",
+              "ToolTip": "C:\\AiBoardgameDashboard\\BoardGameAiDashboard\\BoardGameAiDashboard.Domain\\Entities\\GameCharacter.cs",
+              "RelativeToolTip": "BoardGameAiDashboard.Domain\\Entities\\GameCharacter.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-14T11:30:40.643Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\AiBoardgameDashboard\\BoardGameAiDashboard\\BoardGameAiDashboard.Api\\appsettings.json",
+              "RelativeDocumentMoniker": "BoardGameAiDashboard.Api\\appsettings.json",
+              "ToolTip": "C:\\AiBoardgameDashboard\\BoardGameAiDashboard\\BoardGameAiDashboard.Api\\appsettings.json",
+              "RelativeToolTip": "BoardGameAiDashboard.Api\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-07-14T10:01:17.764Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "MatchHistory.cs",
+              "DocumentMoniker": "C:\\AiBoardgameDashboard\\BoardGameAiDashboard\\BoardGameAiDashboard.Domain\\Entities\\MatchHistory.cs",
+              "RelativeDocumentMoniker": "BoardGameAiDashboard.Domain\\Entities\\MatchHistory.cs",
+              "ToolTip": "C:\\AiBoardgameDashboard\\BoardGameAiDashboard\\BoardGameAiDashboard.Domain\\Entities\\MatchHistory.cs",
+              "RelativeToolTip": "BoardGameAiDashboard.Domain\\Entities\\MatchHistory.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-14T09:59:51.603Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "GameRuleChunk.cs",
+              "DocumentMoniker": "C:\\AiBoardgameDashboard\\BoardGameAiDashboard\\BoardGameAiDashboard.Domain\\Entities\\GameRuleChunk.cs",
+              "RelativeDocumentMoniker": "BoardGameAiDashboard.Domain\\Entities\\GameRuleChunk.cs",
+              "ToolTip": "C:\\AiBoardgameDashboard\\BoardGameAiDashboard\\BoardGameAiDashboard.Domain\\Entities\\GameRuleChunk.cs",
+              "RelativeToolTip": "BoardGameAiDashboard.Domain\\Entities\\GameRuleChunk.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-14T09:59:47.113Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ApplicationDbContext.cs",
+              "DocumentMoniker": "C:\\AiBoardgameDashboard\\BoardGameAiDashboard\\BoardGameAiDashboard.Infrastructure\\Persistence\\ApplicationDbContext.cs",
+              "RelativeDocumentMoniker": "BoardGameAiDashboard.Infrastructure\\Persistence\\ApplicationDbContext.cs",
+              "ToolTip": "C:\\AiBoardgameDashboard\\BoardGameAiDashboard\\BoardGameAiDashboard.Infrastructure\\Persistence\\ApplicationDbContext.cs",
+              "RelativeToolTip": "BoardGameAiDashboard.Infrastructure\\Persistence\\ApplicationDbContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAIYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-14T09:58:04.249Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Game.cs",
+              "DocumentMoniker": "C:\\AiBoardgameDashboard\\BoardGameAiDashboard\\BoardGameAiDashboard.Domain\\Entities\\Game.cs",
+              "RelativeDocumentMoniker": "BoardGameAiDashboard.Domain\\Entities\\Game.cs",
+              "ToolTip": "C:\\AiBoardgameDashboard\\BoardGameAiDashboard\\BoardGameAiDashboard.Domain\\Entities\\Game.cs",
+              "RelativeToolTip": "BoardGameAiDashboard.Domain\\Entities\\Game.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAABgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-14T09:59:38.246Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "20260714100729_InitialCreate.cs",
+              "DocumentMoniker": "C:\\AiBoardgameDashboard\\BoardGameAiDashboard\\BoardGameAiDashboard.Infrastructure\\Migrations\\20260714100729_InitialCreate.cs",
+              "RelativeDocumentMoniker": "BoardGameAiDashboard.Infrastructure\\Migrations\\20260714100729_InitialCreate.cs",
+              "ToolTip": "C:\\AiBoardgameDashboard\\BoardGameAiDashboard\\BoardGameAiDashboard.Infrastructure\\Migrations\\20260714100729_InitialCreate.cs",
+              "RelativeToolTip": "BoardGameAiDashboard.Infrastructure\\Migrations\\20260714100729_InitialCreate.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-14T10:07:29.505Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\AiBoardgameDashboard\\BoardGameAiDashboard\\BoardGameAiDashboard.Api\\Program.cs",
+              "RelativeDocumentMoniker": "BoardGameAiDashboard.Api\\Program.cs",
+              "ToolTip": "C:\\AiBoardgameDashboard\\BoardGameAiDashboard\\BoardGameAiDashboard.Api\\Program.cs",
+              "RelativeToolTip": "BoardGameAiDashboard.Api\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-14T10:02:02.428Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
