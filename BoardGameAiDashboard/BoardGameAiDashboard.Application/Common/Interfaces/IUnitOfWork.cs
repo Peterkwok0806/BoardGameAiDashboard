@@ -24,6 +24,12 @@ public interface IUnitOfWork : IDisposable
     /// <summary>Match history repository (ML.NET feature data).</summary>
     IGenericRepository<MatchHistory> Matches { get; }
 
+    /// <summary>User repository (authentication).</summary>
+    IGenericRepository<User> Users { get; }
+
+    /// <summary>Refresh token repository (JWT refresh flow).</summary>
+    IGenericRepository<RefreshToken> RefreshTokens { get; }
+
     /// <summary>
     /// Persist all pending changes across all repositories in a single batch.
     /// </summary>

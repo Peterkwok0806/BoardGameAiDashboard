@@ -117,6 +117,16 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     }
 
     /// <inheritdoc />
+    public async Task<T?> FindOneAsync(
+        Expression<Func<T, bool>> predicate,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.Set<T>()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(predicate, cancellationToken);
+    }
+
+    /// <inheritdoc />
     public IQueryable<T> Query()
     {
         return _context.Set<T>().AsQueryable();

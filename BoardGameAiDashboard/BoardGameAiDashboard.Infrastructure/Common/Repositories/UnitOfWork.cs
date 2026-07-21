@@ -17,6 +17,8 @@ public class UnitOfWork : IUnitOfWork
     private IGenericRepository<GameCharacter>? _characters;
     private IGenericRepository<GameCard>? _cards;
     private IGenericRepository<MatchHistory>? _matches;
+    private IGenericRepository<User>? _users;
+    private IGenericRepository<RefreshToken>? _refreshTokens;
 
     public UnitOfWork(ApplicationDbContext context)
     {
@@ -42,6 +44,14 @@ public class UnitOfWork : IUnitOfWork
     /// <inheritdoc />
     public IGenericRepository<MatchHistory> Matches =>
         _matches ??= new GenericRepository<MatchHistory>(_context);
+
+    /// <inheritdoc />
+    public IGenericRepository<User> Users =>
+        _users ??= new GenericRepository<User>(_context);
+
+    /// <inheritdoc />
+    public IGenericRepository<RefreshToken> RefreshTokens =>
+        _refreshTokens ??= new GenericRepository<RefreshToken>(_context);
 
     /// <inheritdoc />
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

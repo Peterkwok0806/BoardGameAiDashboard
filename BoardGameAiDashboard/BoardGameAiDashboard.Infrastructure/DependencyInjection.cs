@@ -1,6 +1,7 @@
 using BoardGameAiDashboard.Application.Common.Interfaces;
 using BoardGameAiDashboard.Infrastructure.Common.Repositories;
 using BoardGameAiDashboard.Infrastructure.Persistence;
+using BoardGameAiDashboard.Infrastructure.Services.Auth;
 using Hangfire;
 using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -80,6 +81,10 @@ public static class DependencyInjection
         });
 
         services.AddAuthorization();
+
+        // ── Auth Services (Password Hashing + JWT) ──────────────────────
+        services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
+        services.AddScoped<IJwtTokenService, JwtTokenService>();
 
         return services;
     }

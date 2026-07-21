@@ -40,6 +40,13 @@ public interface IGenericRepository<T> where T : class
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Find the first entity matching the given predicate, or null if none matches.
+    /// </summary>
+    Task<T?> FindOneAsync(
+        Expression<Func<T, bool>> predicate,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Expose an <see cref="IQueryable{T}"/> for advanced LINQ queries.
     /// The caller is responsible for applying AsNoTracking() and soft-delete filters
     /// unless the implementation handles them automatically.

@@ -4,9 +4,8 @@ namespace BoardGameAiDashboard.Application.Features.Auth;
 
 /// <summary>
 /// CQRS command to authenticate a user and issue JWT tokens.
-/// Planned for Phase 6 (JWT + Identity).
 /// </summary>
-public sealed record LoginUserCommand : IRequest<AuthResultDto>
+public sealed record LoginUserCommand : IRequest<TokenPairResponse>
 {
     /// <summary>User's email address.</summary>
     public string Email { get; init; } = string.Empty;

@@ -23,6 +23,8 @@ namespace BoardGameAiDashboard.Infrastructure.Persistence
         public DbSet<GameCharacter> GameCharacters => Set<GameCharacter>();
         public DbSet<GameCard> GameCards => Set<GameCard>();
         public DbSet<MatchHistory> MatchHistories => Set<MatchHistory>();
+        public DbSet<User> Users => Set<User>();
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -103,6 +105,33 @@ namespace BoardGameAiDashboard.Infrastructure.Persistence
                 entity.HasOne(d => d.Game)
                       .WithMany(p => p.MatchHistories)
                       .HasForeignKey(d => d.GameId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasQueryFilter(e => e.IsDeleted == false);
+            });
+
+            // 6. User table configuration (JWT authentication)
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Email).IsRequired().HasMaxLength(256);
+                entity.Property(e => e.DisplayName).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.PasswordHash).IsRequired().HasMaxLength(256);
+                entity.HasIndex(e => e.Email).IsUnique();
+                entity.HasQueryFilter(e => e.IsDeleted == false);
+            });
+
+            // 7. Refresh token table configuration (JWT token rotation)
+            modelBuilder.Entity<RefreshToken>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Token).IsRequired().HasMaxLength(512);
+                entity.HasIndex(e => e.Token).IsUnique();
+                entity.Property(e => e.CreatedByIp).HasMaxLength(45);
+
+                entity.HasOne(d => d.User)
+                      .WithMany(p => p.RefreshTokens)
+                      .HasForeignKey(d => d.UserId)
                       .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasQueryFilter(e => e.IsDeleted == false);

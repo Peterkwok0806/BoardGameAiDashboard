@@ -7,8 +7,11 @@ namespace BoardGameAiDashboard.Api.Middleware;
 
 /// <summary>
 /// Global exception handling middleware.
-/// Translates known exceptions into RFC 7807 ProblemDetails responses.
-/// Unknown exceptions return a generic 500 ProblemDetails (no stack trace leak).
+/// Translates known exceptions into RFC 7807 ProblemDetails,
+/// then wraps them in the unified ApiResult envelope
+/// <c>{ success: false, data: ProblemDetails, timestamp }</c>
+/// so that frontend always receives a consistent response shape.
+/// Unknown exceptions return a generic 500 (no stack trace leak).
 /// </summary>
 public sealed class ExceptionHandlingMiddleware
 {
@@ -53,6 +56,12 @@ public sealed class ExceptionHandlingMiddleware
             ForbiddenAccessException forbidden =>
                 (HttpStatusCode.Forbidden, "Forbidden", forbidden.Message),
 
+            UnauthorizedException unauthorized =>
+                (HttpStatusCode.Unauthorized, "Unauthorized", unauthorized.Message),
+
+            ConflictException conflict =>
+                (HttpStatusCode.Conflict, "Conflict", conflict.Message),
+
             ValidationException validation =>
                 (HttpStatusCode.BadRequest, "Validation Error", "One or more validation errors occurred."),
 
@@ -77,10 +86,17 @@ public sealed class ExceptionHandlingMiddleware
             problemDetails.Extensions["errors"] = valEx.Errors;
         }
 
+        var envelope = new Dictionary<string, object>
+        {
+            { "success", false },
+            { "data", problemDetails },
+            { "timestamp", DateTime.UtcNow }
+        };
+
         context.Response.StatusCode = (int)statusCode;
-        context.Response.ContentType = "application/problem+json";
+        context.Response.ContentType = "application/json";
 
         await context.Response.WriteAsync(
-            JsonSerializer.Serialize(problemDetails, JsonOptions));
+            JsonSerializer.Serialize(envelope, JsonOptions));
     }
 }

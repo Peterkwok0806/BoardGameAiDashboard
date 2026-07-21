@@ -27,10 +27,12 @@ Tests (future): BoardGameAiDashboard.Tests/
 ## 4. 程式碼品質 (硬性要求)
 1. **軟刪除**：所有 EF Core 查詢自動加 `!IsDeleted` 過濾，嚴禁遺漏
 2. **非同步**：所有後端資料讀寫與 API 一律使用 `async/await`，嚴禁使用 `.Result` 或 `.Wait()`
-3. **回應格式**：API 成功回應必須統一打包為 `ApiResult<T>`；錯誤時嚴格遵循 `ProblemDetails` (RFC 7807)
-4. **效能**：讀取查詢優先使用 `AsNoTracking()`；需要防 Race Condition 時使用 `UPDLOCK`
-5. **批次操作**：優先使用 `ExecuteUpdateAsync` / `ExecuteDeleteAsync`，避免逐筆迴圈更新
-6. **JSON 欄位**：已建好 `ValueConverter` + `ValueComparer`，模型一律使用 `Dictionary<string, string>`
+3. **回應格式**：API 成功回應由 `ApiResultFilter` 自動包裝（Controller 直接回傳 raw data，嚴禁手動呼叫 `ApiResult<T>.Ok()`）；錯誤時嚴格遵循 `ProblemDetails` (RFC 7807)
+4. **薄 Controller**：Controller 僅負責 HTTP 關注點（路由、狀態碼、請求繫結），嚴禁包含業務邏輯。業務邏輯一律放在 CQRS Handler 中
+5. **Domain Exceptions**：CQRS Handler 嚴禁拋出 `InvalidOperationException` 或 `KeyNotFoundException`，必須使用 Domain Exceptions（`NotFoundException`、`UnauthorizedException`、`ConflictException`、`ValidationException`）
+6. **效能**：讀取查詢優先使用 `AsNoTracking()`；需要防 Race Condition 時使用 `UPDLOCK`
+7. **批次操作**：優先使用 `ExecuteUpdateAsync` / `ExecuteDeleteAsync`，避免逐筆迴圈更新
+8. **JSON 欄位**：已建好 `ValueConverter` + `ValueComparer`，模型一律使用 `Dictionary<string, string>`
 
 ## 5. 架構規範 (Clean Architecture 四層)
 1. **Domain 層**：零外部 NuGet 依賴，僅用 `System.*` + Domain 聚合根/實體

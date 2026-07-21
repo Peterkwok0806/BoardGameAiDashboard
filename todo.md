@@ -77,10 +77,18 @@
 - [x] **Predictions Feature (CQRS)** — Placeholder ✅:
   - [x] `GetWinRateQuery` + Handler (placeholder — returns stub response)
   - [x] `GetChurnPredictionQuery` + Handler (placeholder — returns stub response)
-- [ ] ❌ **Auth Feature (CQRS)** (Phase 6):
-  - `RegisterUserCommand` + Handler
-  - `LoginUserCommand` + Handler
-  - `RefreshTokenCommand` + Handler
+- [x] **Auth Feature (CQRS)** (Phase 6) ✅:
+  - [x] `RegisterUserCommand` + Handler + Validator
+  - [x] `LoginUserCommand` + Handler + Validator
+  - [x] `RefreshTokenCommand` + Handler + Validator
+  - [x] `GetCurrentUserQuery` + Handler
+  - [x] `IPasswordHasher` interface + `BCryptPasswordHasher` implementation
+  - [x] `IJwtTokenService` interface + `JwtTokenService` implementation (access + refresh token)
+  - [x] `User` domain entity (inherits BaseEntity)
+  - [x] `RefreshToken` domain entity (inherits BaseEntity)
+  - [x] JWT Bearer authentication configured in `Program.cs`
+  - [x] `[Authorize]` on all endpoints except `/api/auth/*`
+  - [x] EF Core migration `AddAuthTables` created
 - [x] **MatchHistory Feature (CQRS)** — Placeholder ✅:
   - [x] `RecordMatchCommand` + Handler (placeholder — returns stub response)
   - [x] `GetMatchHistoryQuery` + Handler (placeholder — returns empty list)
@@ -128,14 +136,14 @@
 
 ## Phase 5: API Controllers & Middleware — ✅ 100% Done
 
-- [x] Create `ExceptionHandlingMiddleware` (global exception handler — RFC 7807 ProblemDetails) ✅
+- [x] Create `ExceptionHandlingMiddleware` (global exception handler — RFC 7807 ProblemDetails, wrapped in ApiResult envelope) ✅
 - [x] Create `RequestLoggingMiddleware` (structured request/response logging with Serilog) ✅
 - [x] Create `ApiResultFilter` (uniform `{ success, data, timestamp }` envelope) ✅
 - [x] Create Controllers (5 controllers) ✅:
   - [x] `GamesController` — full CRUD (`/api/games`) — Get, GetById, Create, Update, Delete ✅
   - [x] `ChatController` — RAG endpoints (`/api/chat`) — placeholder ✅
   - [x] `PredictionsController` — ML endpoints (`/api/predictions`) — placeholder ✅
-  - [x] `AuthController` — Auth endpoints (`/api/auth`) — placeholder ✅
+  - [x] `AuthController` — Auth endpoints (`/api/auth`) —薄 Controller ✅
   - [x] `MatchHistoryController` — Match history endpoints (`/api/matches`) — placeholder ✅
 - [x] Configure middleware pipeline in `Program.cs` (ExceptionHandling → RequestLogging → Authorization → Controllers) ✅
 - [x] Register `ApiResultFilter` globally via `AddControllers(options.Filters.Add<ApiResultFilter>())` ✅
@@ -143,17 +151,74 @@
 
 ---
 
-## Phase 6: Auth (JWT + Refresh Token) — 🔴 0% Not Started
+## Phase 6: Auth (JWT + Refresh Token) — ✅ 100% Done
 
-- [ ] ❌ Implement `JwtTokenService`:
-  - Access Token (15 min TTL)
-  - Refresh Token (7 day TTL, single-use rotation)
-- [ ] ❌ Create `RegisterUserCommand` + Handler
-- [ ] ❌ Create `LoginUserCommand` + Handler
-- [ ] ❌ Create `GetCurrentUserQuery` + Handler
-- [ ] ❌ Create refresh token endpoint (`POST /api/auth/refresh`)
-- [ ] ❌ Configure JWT Bearer authentication in `Program.cs`
-- [ ] ❌ Add `[Authorize]` to all endpoints except `/api/auth/*`
+- [x] Implement `IPasswordHasher` + `BCryptPasswordHasher` ✅
+- [x] Implement `IJwtTokenService` + `JwtTokenService` ✅:
+  - Access Token (15 min TTL) ✅
+  - Refresh Token (7 day TTL, single-use rotation) ✅
+- [x] Create `User` domain entity (Email, DisplayName, PasswordHash) ✅
+- [x] Create `RefreshToken` domain entity (Token, Expires, Revoked, ReplacedByToken) ✅
+- [x] Create `RegisterUserCommand` + Handler + Validator ✅
+- [x] Create `LoginUserCommand` + Handler + Validator ✅
+- [x] Create `RefreshTokenCommand` + Handler + Validator ✅
+- [x] Create `GetCurrentUserQuery` + Handler ✅
+- [x] `GET /api/auth/me` — Get current user profile ✅
+- [x] `POST /api/auth/refresh` — Refresh token endpoint ✅
+- [x] Configure JWT Bearer authentication in `Program.cs` ✅
+- [x] Add `[Authorize]` to all endpoints except `/api/auth/*` ✅
+- [x] EF Core migration `AddAuthTables` created ✅
+- [x] Build verified — 0 errors ✅
+
+---
+
+## Phase 6.5: Auth API Refactoring — ✅ 100% Done
+
+> Eliminated "Fat Controller" anti-pattern. Controllers now only handle HTTP concerns.
+
+### Problems Fixed
+1. **Double-wrapping `ApiResult`**: AuthController's `Login/Register/Refresh` actions manually called `ApiResult<T>.Ok()` → `ApiResultFilter` wrapped again → frontend received `{ success, data: { success, data: ... } }`. Removed `Ok()` calls; filter handles it.
+2. **Fat Controller**: `LoginUser` action contained BCrypt compare + JWT generation + refresh token issuance + DB operations (~40 lines business logic). Moved to `LoginUserCommandHandler`.
+3. **Duplicate exceptions**: `UnauthorizedException` thrown from Controller + Handler (2 different exception types). Consolidated to `UnauthorizedException` everywhere.
+
+### Files Modified
+- **Controllers/AuthController.cs** — Stripped to thin dispatchers (1-3 lines each). Uses `[ApiController]`, `[Route("api/[controller]")]`, auto `[ApiResultFilter]` via controller-level attribute. Removed `IAuthorizationService` dependency.
+- **RegisterUserCommandHandler.cs** — Absorbed registration logic (duplicate check, password hash, user+token create, save). Throws `ConflictException` / `ValidationException`.
+- **LoginUserCommandHandler.cs** — Absorbed login logic (user lookup, BCrypt verify, JWT issue, refresh token create). Throws `NotFoundException` / `UnauthorizedException` / `ValidationException`.
+- **RefreshTokenCommandHandler.cs** — Absorbed refresh logic (validate token, rotate, issue new pair). Throws `NotFoundException` / `UnauthorizedException` / `ValidationException`.
+- **GetCurrentUserQueryHandler.cs** — Changed `KeyNotFoundException` to `NotFoundException`.
+
+### Build Result
+- ✅ 0 errors, 0 warnings (pre-existing AutoMapper NU1903 warning only)
+
+### Governance Rule
+> **All future CQRS handlers must throw domain exceptions (`NotFoundException`, `UnauthorizedException`, `ConflictException`, `ValidationException`) instead of standard `InvalidOperationException`.**
+> **Controllers must never contain business logic — only HTTP concerns (status codes, route, request binding).**
+
+---
+
+## Phase 6.6: Unified Response Envelope — ✅ 100% Done
+
+> Fixed architectural conflict: Middleware was outputting raw ProblemDetails while Filter wraps with `{ success, data, timestamp }`. Frontend received two incompatible response formats.
+
+### Problem
+- **Success path**: `ApiResultFilter` wraps → `{ success: true, data: {...}, timestamp: "..." }`
+- **Error path**: `ExceptionHandlingMiddleware` wrote raw ProblemDetails → `{ status: 401, title: "...", detail: "..." }` 
+- Frontend Interceptor must handle **two completely different shapes** — `response.data.success` is `undefined` on error.
+
+### Solution
+`ExceptionHandlingMiddleware` now wraps ProblemDetails in the same `{ success: false, data: ProblemDetails, timestamp }` envelope. Frontend Interceptor uses **one unified logic**:
+
+```typescript
+// Unified — works for both success and error
+if (response.data.success) { /* ok */ } else { /* error from response.data.data */ }
+```
+
+### File Modified
+- **Middleware/ExceptionHandlingMiddleware.cs** — Wrapped ProblemDetails output in `{ success: false, data, timestamp }` envelope. Changed `ContentType` from `application/problem+json` to `application/json`. Updated XML doc.
+
+### Build Result
+- ✅ 0 errors (2 pre-existing warnings: AutoMapper NU1903 + nullable CS8625)
 
 ---
 
@@ -297,11 +362,11 @@
 |-------|------|--------|----------|
 | 0 | Project Setup | ✅ Done | 100% |
 | 1 | Domain Entities | ✅ Done | 100% |
-| 2 | Application Layer | 🟡 In Progress | 75% |
+| 2 | Application Layer | 🟢 Done | 100% |
 | 3 | Database & EF Core | 🟢 Done (pending seed) | 95% |
 | 4 | Repository & UoW | ✅ Done | 100% |
 | 5 | API Controllers & Middleware | ✅ Done | 100% |
-| 6 | Auth (JWT) | 🔴 Not Started | 0% |
+| 6 | Auth (JWT) | ✅ Done | 100% |
 | 7 | RAG Pipeline | 🔴 Not Started | 0% |
 | 8 | ML.NET | 🔴 Not Started | 0% |
 | 9 | Redis Caching | 🟡 Partial | 20% |
@@ -318,7 +383,7 @@
 - **RAG first** — it's the core value of this project
 - All EF Core queries must filter `!IsDeleted` — no exceptions
 - All API methods must be `async/await` — never use `.Result` or `.Wait()`
-- API responses wrapped in `ApiResult<T>`, errors use `ProblemDetails` (RFC 7807)
+- API responses unified: `{ success: boolean, data: T | ProblemDetails, timestamp }` — both success and error paths use the same envelope. `ApiResultFilter` handles success, `ExceptionHandlingMiddleware` wraps errors.
 - Keep ML models lightweight; use ONNX where possible
 - Always include metadata filtering in vector searches
 - Reference `architecture.md` for any architectural decisions
