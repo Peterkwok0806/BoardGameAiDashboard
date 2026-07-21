@@ -106,15 +106,20 @@
 
 ---
 
-## Phase 4: Repository & Unit of Work — 🟡 40% In Progress
+## Phase 4: Repository & Unit of Work — ✅ 100% Done
 
 - [x] Create `IGenericRepository<T>` interface in Application layer ✅ (done in Phase 2)
 - [x] Create `IUnitOfWork` interface in Application layer ✅ (done in Phase 2)
-- [ ] ❌ Implement `GenericRepository<T>` in Infrastructure layer:
-  - `GetByIdAsync`, `GetAllAsync`, `AddAsync`, `UpdateAsync`, `DeleteAsync`
-  - All queries automatically filter `!IsDeleted`
-- [ ] ❌ Implement `UnitOfWork` with `SaveChangesAsync`
-- [ ] ❌ Register repositories in DI container
+- [x] Implement `GenericRepository<T>` in Infrastructure layer ✅:
+  - `GetByIdAsync` (AsNoTracking), `GetAllAsync` (AsNoTracking), `GetPagedAsync` (with optional filter)
+  - `AddAsync`, `UpdateAsync` (Attach + Modified + MarkUpdated), `DeleteAsync` (soft-delete + Modified)
+  - `CountAsync` (with optional filter), `Query()` (IQueryable for advanced LINQ)
+  - All queries automatically filter `!IsDeleted` via EF Core `HasQueryFilter` ✅
+- [x] Implement `UnitOfWork` with lazy-initialized repositories and `SaveChangesAsync` ✅
+- [x] Register repositories in DI container (`DependencyInjection.cs`) ✅:
+  - `IGenericRepository<>` → `GenericRepository<>` (open generic, scoped)
+  - `IUnitOfWork` → `UnitOfWork` (scoped)
+- [x] Build verified — 0 errors ✅
 
 ---
 
@@ -290,7 +295,7 @@
 | 1 | Domain Entities | ✅ Done | 100% |
 | 2 | Application Layer | � In Progress | 35% |
 | 3 | Database & EF Core | ✅ Done | 95% |
-| 4 | Repository & UoW | 🟡 In Progress | 40% |
+| 4 | Repository & UoW | ✅ Done | 100% |
 | 5 | API Controllers | 🔴 Not Started | 0% |
 | 6 | Auth (JWT) | 🔴 Not Started | 0% |
 | 7 | RAG Pipeline | 🔴 Not Started | 0% |

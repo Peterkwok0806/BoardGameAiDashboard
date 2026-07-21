@@ -1,3 +1,5 @@
+using BoardGameAiDashboard.Application.Common.Interfaces;
+using BoardGameAiDashboard.Infrastructure.Common.Repositories;
 using BoardGameAiDashboard.Infrastructure.Persistence;
 using Hangfire;
 using Hangfire.SqlServer;
@@ -20,6 +22,10 @@ public static class DependencyInjection
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(
                 configuration.GetConnectionString("DefaultConnection")));
+
+        // ── Generic Repository & Unit of Work ───────────────────────────
+        services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         // ── Redis Distributed Cache ────────────────────────────────────
         services.AddStackExchangeRedisCache(options =>
