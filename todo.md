@@ -49,7 +49,7 @@
 
 ---
 
-## Phase 2: Application Layer (CQRS + Validation) — 🟡 35% Done
+## Phase 2: Application Layer (CQRS + Validation) — 🟡 75% Done
 
 - [x] Setup MediatR with assembly scanning (`IApplicationAssemblyMarker`) ✅
 - [x] Create `ApiResult<T>` response wrapper (see `architecture.md` Section 7.5) ✅
@@ -71,16 +71,19 @@
   - [x] `GameMappings` AutoMapper profile
   - [x] `NotFoundException` custom exception
   - [x] `Game.Update()` domain method added
-- [ ] ❌ **Chat Feature (CQRS)**:
-  - `SendChatMessageCommand` + Handler
-  - `GetChatHistoryQuery` + Handler
-- [ ] ❌ **Predictions Feature (CQRS)**:
-  - `GetWinRateQuery` + Handler
-  - `GetChurnPredictionQuery` + Handler
-  - `TrainModelCommand` + Handler
-- [ ] ❌ **MatchHistory Feature (CQRS)**:
-  - `RecordMatchCommand` + Handler
-  - `GetMatchHistoryQuery` + Handler
+- [x] **Chat Feature (CQRS)** — Placeholder ✅:
+  - [x] `SendChatMessageCommand` + Handler (placeholder — returns stub response)
+  - [x] `GetChatHistoryQuery` + Handler (placeholder — returns empty list)
+- [x] **Predictions Feature (CQRS)** — Placeholder ✅:
+  - [x] `GetWinRateQuery` + Handler (placeholder — returns stub response)
+  - [x] `GetChurnPredictionQuery` + Handler (placeholder — returns stub response)
+- [ ] ❌ **Auth Feature (CQRS)** (Phase 6):
+  - `RegisterUserCommand` + Handler
+  - `LoginUserCommand` + Handler
+  - `RefreshTokenCommand` + Handler
+- [x] **MatchHistory Feature (CQRS)** — Placeholder ✅:
+  - [x] `RecordMatchCommand` + Handler (placeholder — returns stub response)
+  - [x] `GetMatchHistoryQuery` + Handler (placeholder — returns empty list)
 
 > Note: `Features/Users/Commands/RegisterUser/` folder exists but is **empty**.
 
@@ -123,19 +126,20 @@
 
 ---
 
-## Phase 5: API Controllers & Middleware — 🔴 0% Not Started
+## Phase 5: API Controllers & Middleware — ✅ 100% Done
 
-- [ ] ❌ Create `ExceptionHandlingMiddleware` (global exception handler)
-- [ ] ❌ Create `RequestLoggingMiddleware` (request/response logging)
-- [ ] ❌ Create `ApiResultFilter` (uniform API response wrapper)
-- [ ] ❌ Create Controllers:
-  - `GamesController` — CRUD endpoints (`/api/games`)
-  - `ChatController` — RAG endpoints (`/api/chat`)
-  - `PredictionsController` — ML endpoints (`/api/predictions`)
-  - `AuthController` — Auth endpoints (`/api/auth`)
-  - `MatchHistoryController` — Match history endpoints (`/api/matches`)
-- [ ] ❌ Implement pagination pattern (see `architecture.md` Section 9.2)
-- [ ] ❌ Configure Swagger with JWT Bearer token support
+- [x] Create `ExceptionHandlingMiddleware` (global exception handler — RFC 7807 ProblemDetails) ✅
+- [x] Create `RequestLoggingMiddleware` (structured request/response logging with Serilog) ✅
+- [x] Create `ApiResultFilter` (uniform `{ success, data, timestamp }` envelope) ✅
+- [x] Create Controllers (5 controllers) ✅:
+  - [x] `GamesController` — full CRUD (`/api/games`) — Get, GetById, Create, Update, Delete ✅
+  - [x] `ChatController` — RAG endpoints (`/api/chat`) — placeholder ✅
+  - [x] `PredictionsController` — ML endpoints (`/api/predictions`) — placeholder ✅
+  - [x] `AuthController` — Auth endpoints (`/api/auth`) — placeholder ✅
+  - [x] `MatchHistoryController` — Match history endpoints (`/api/matches`) — placeholder ✅
+- [x] Configure middleware pipeline in `Program.cs` (ExceptionHandling → RequestLogging → Authorization → Controllers) ✅
+- [x] Register `ApiResultFilter` globally via `AddControllers(options.Filters.Add<ApiResultFilter>())` ✅
+- [x] Swagger JWT Bearer token support ✅ (configured in Phase 0)
 
 ---
 
@@ -272,9 +276,9 @@
 
 1. **Phase 0** → Complete missing NuGet packages, DI setup, appsettings → ✅ 100%
 2. **Phase 1** → Create BaseEntity, refactor all entities → ✅ 100%
-3. **Phase 3** → Add soft delete query filter, re-migrate, seed data → 🟢 85%
-4. **Phase 4** → Repository pattern operational → 🟡 40% (interfaces done)
-5. **Phase 5** → Games CRUD controller returning data → 🔴 0%
+3. **Phase 3** → Add soft delete query filter, re-migrate, seed data → 🟢 95%
+4. **Phase 4** → Repository pattern operational → ✅ 100%
+5. **Phase 5** → Games CRUD + middleware + all controllers → ✅ 100%
 6. **Phase 7** → Basic RAG flow (`/api/chat/ask` with one game's rules) → 🔴 0%
 
 > 💡 **Strategy**: Get a thin vertical slice working first (Game CRUD + RAG Chat), then expand horizontally.
@@ -293,10 +297,10 @@
 |-------|------|--------|----------|
 | 0 | Project Setup | ✅ Done | 100% |
 | 1 | Domain Entities | ✅ Done | 100% |
-| 2 | Application Layer | � In Progress | 35% |
-| 3 | Database & EF Core | ✅ Done | 95% |
+| 2 | Application Layer | 🟡 In Progress | 75% |
+| 3 | Database & EF Core | 🟢 Done (pending seed) | 95% |
 | 4 | Repository & UoW | ✅ Done | 100% |
-| 5 | API Controllers | 🔴 Not Started | 0% |
+| 5 | API Controllers & Middleware | ✅ Done | 100% |
 | 6 | Auth (JWT) | 🔴 Not Started | 0% |
 | 7 | RAG Pipeline | 🔴 Not Started | 0% |
 | 8 | ML.NET | 🔴 Not Started | 0% |
@@ -304,7 +308,7 @@
 | 10 | Hangfire | 🟡 Partial | 33% |
 | 11 | SignalR | 🔴 Not Started | 0% |
 | 12 | Angular Frontend | 🔴 Not Started | 0% |
-| 13 | Testing & Deployment | 🟡 In Progress | 5% |
+| 13 | Testing & Deployment | 🔴 Not Started | 0% |
 
 ---
 

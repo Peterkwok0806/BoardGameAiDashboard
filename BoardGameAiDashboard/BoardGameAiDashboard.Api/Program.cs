@@ -1,4 +1,6 @@
-﻿using BoardGameAiDashboard.Application;
+﻿using BoardGameAiDashboard.Api.Filters;
+using BoardGameAiDashboard.Api.Middleware;
+using BoardGameAiDashboard.Application;
 using BoardGameAiDashboard.Infrastructure;
 using Hangfire;
 using Hangfire.Dashboard;
@@ -36,7 +38,11 @@ builder.Services.AddCors(options =>
 });
 
 // ── Controllers + Swagger ───────────────────────────────────────────
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    // Auto-wrap all successful responses in { success, data, timestamp } envelope
+    options.Filters.Add<ApiResultFilter>();
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -68,11 +74,11 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-// ── Exception Handling Middleware ────────────────────────────────────
-app.UseExceptionHandler("/error");
+// ── Custom Exception Handling Middleware (RFC 7807 ProblemDetails) ───
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-// ── Serilog Request Logging ─────────────────────────────────────────
-app.UseSerilogRequestLogging();
+// ── Custom Request Logging Middleware (Serilog) ─────────────────────
+app.UseMiddleware<RequestLoggingMiddleware>();
 
 // ── Swagger (always available in dev, can be enabled in prod too) ───
 if (app.Environment.IsDevelopment())

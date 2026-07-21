@@ -21,7 +21,7 @@ public class UnitOfWork : IUnitOfWork
     public UnitOfWork(ApplicationDbContext context)
     {
         _context = context;
-    }
+    } 
 
     /// <inheritdoc />
     public IGenericRepository<Game> Games =>
