@@ -13,7 +13,7 @@
   - [x] `BoardGameAiDashboard.Application` ✅
   - [x] `BoardGameAiDashboard.Infrastructure` ✅
   - [x] `BoardGameAiDashboard.Api` ✅
-  - [ ] `BoardGameAiDashboard.Tests` (future)
+- [x] `BoardGameAiDashboard.Tests` ✅ (xUnit + InMemory provider)
 - [x] Add all NuGet packages per layer (see `architecture.md` Section 4) ✅
   - Domain: *(none — pure domain)* ✅
   - Application: MediatR ✅, FluentValidation ✅, AutoMapper ✅
@@ -96,9 +96,9 @@
   - [x] `GameCharacterConfiguration` ✅
   - [x] `GameRuleChunkConfiguration` ✅
   - [x] `MatchHistoryConfiguration` ✅
-- [ ] ❌ Configure soft delete global query filter (`!IsDeleted`) — **BaseEntity done ✅, ready to implement**
+- [x] Configure soft delete global query filter (`!IsDeleted`) ✅ — Implemented via `HasQueryFilter` + shadow property (runtime-only, no snapshot) ✅
 - [x] Add EF Core migrations — `InitialCreate` migration exists ✅
-  - [ ] ❌ Re-migrate after adding BaseEntity/IsDeleted
+  - [x] Soft delete via shadow property + query filter — no re-migration needed ✅
 - [ ] ❌ Seed initial Games data
 
 ---
@@ -275,7 +275,7 @@
 
 ## 🛑 Currently Blocked
 
-- **Phase 3 (soft delete query filter)** — BaseEntity is done ✅; now blocked on adding `HasQueryFilter` in Infrastructure + re-generating EF migration
+- (none — Phase 3 soft delete query filter resolved ✅)
 
 ---
 
@@ -286,7 +286,7 @@
 | 0 | Project Setup | ✅ Done | 100% |
 | 1 | Domain Entities | ✅ Done | 100% |
 | 2 | Application Layer | � In Progress | 35% |
-| 3 | Database & EF Core | 🟢 Mostly Done | 85% |
+| 3 | Database & EF Core | ✅ Done | 95% |
 | 4 | Repository & UoW | 🔴 Not Started | 0% |
 | 5 | API Controllers | 🔴 Not Started | 0% |
 | 6 | Auth (JWT) | 🔴 Not Started | 0% |
@@ -296,7 +296,7 @@
 | 10 | Hangfire | 🟡 Partial | 33% |
 | 11 | SignalR | 🔴 Not Started | 0% |
 | 12 | Angular Frontend | 🔴 Not Started | 0% |
-| 13 | Testing & Deployment | 🔴 Not Started | 0% |
+| 13 | Testing & Deployment | 🟡 In Progress | 5% |
 
 ---
 

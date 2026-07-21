@@ -19,7 +19,10 @@ namespace BoardGameAiDashboard.Infrastructure.Migrations
                     Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     MinPlayers = table.Column<int>(type: "int", nullable: false),
-                    MaxPlayers = table.Column<int>(type: "int", nullable: false)
+                    MaxPlayers = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -35,7 +38,10 @@ namespace BoardGameAiDashboard.Infrastructure.Migrations
                     CodeName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CardProperties = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    CardProperties = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -57,7 +63,10 @@ namespace BoardGameAiDashboard.Infrastructure.Migrations
                     CodeName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     SkillDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CustomProperties = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    CustomProperties = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -78,7 +87,10 @@ namespace BoardGameAiDashboard.Infrastructure.Migrations
                     GameId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SectionTitle = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    QdrantPointId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                    QdrantPointId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -100,7 +112,10 @@ namespace BoardGameAiDashboard.Infrastructure.Migrations
                     PlayerCount = table.Column<int>(type: "int", nullable: false),
                     IsWinner = table.Column<bool>(type: "bit", nullable: false),
                     PlayedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    GameFeatures = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    GameFeatures = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
