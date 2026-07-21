@@ -6,16 +6,26 @@
 ## ---------------------------------------------------------------
 ## .NET / C# / ASP.NET Core
 ## ---------------------------------------------------------------
-[Bb]in/
-[Oo]bj/
-[Dd]ebug/
-[Rr]elease/
-x64/
-x86/
-build/
-bld/
-[Ll]og/
-[Ll]ogs/
+
+# Visual Studio IDE (full purge)
+**/.vs/
+**/.vs/*
+**/Design[Tt]ime[Bb]uild/
+**/File[Cc]ontent[Ii]ndex/
+**/*.vsidx
+**/v17/
+
+# Build output
+**/[Bb]in/
+**/[Oo]bj/
+**/[Dd]ebug/
+**/[Rr]elease/
+**/x64/
+**/x86/
+**/build/
+**/bld/
+**/[Ll]og/
+**/[Ll]ogs/
 
 # NuGet
 *.nupkg
@@ -32,9 +42,6 @@ project.fragment.lock.json
 ScaffoldingReadMe.txt
 
 # User-specific files
-*.user
-*.userosscache
-*.suo
 *.userprefs
 launchSettings.json.user
 
@@ -42,8 +49,8 @@ launchSettings.json.user
 StyleCopReport.xml
 
 # Build results
-[Dd]ebugPublic/
-[Rr]eleases/
+**/[Dd]ebugPublic/
+**/[Rr]eleases/
 *.[Pp]ublish.xml
 *.azurePubxml
 *.pubxml
