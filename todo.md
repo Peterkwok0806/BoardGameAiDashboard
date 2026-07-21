@@ -58,10 +58,10 @@
 - [x] Create `ValidationBehavior<TRequest, TResponse>` MediatR pipeline behavior ✅
 - [x] Create `LoggingBehavior<TRequest, TResponse>` MediatR pipeline behavior ✅
 - [x] Create `DependencyInjection.cs` in Application layer (MediatR + behaviors + FluentValidation registration) ✅
-- [ ] ❌ Create service interfaces:
-  - `IGenericRepository<T>`
-  - `IUnitOfWork`
-  - `IDateTimeProvider`
+- [x] Create service interfaces ✅:
+  - [x] `IGenericRepository<T>` ✅
+  - [x] `IUnitOfWork` ✅ (simplified — no transaction methods)
+  - [x] `IDateTimeProvider` ✅
 - [ ] ❌ **Games Feature (CQRS)**:
   - `CreateGameCommand` + Handler
   - `UpdateGameCommand` + Handler
@@ -103,14 +103,14 @@
 
 ---
 
-## Phase 4: Repository & Unit of Work — 🔴 0% Not Started
+## Phase 4: Repository & Unit of Work — 🟡 40% In Progress
 
-- [ ] ❌ Create `IGenericRepository<T>` interface in Application layer
-- [ ] ❌ Create `IUnitOfWork` interface in Application layer
+- [x] Create `IGenericRepository<T>` interface in Application layer ✅ (done in Phase 2)
+- [x] Create `IUnitOfWork` interface in Application layer ✅ (done in Phase 2)
 - [ ] ❌ Implement `GenericRepository<T>` in Infrastructure layer:
   - `GetByIdAsync`, `GetAllAsync`, `AddAsync`, `UpdateAsync`, `DeleteAsync`
   - All queries automatically filter `!IsDeleted`
-- [ ] ❌ Implement `UnitOfWork` with `SaveChangesAsync` and transaction support
+- [ ] ❌ Implement `UnitOfWork` with `SaveChangesAsync`
 - [ ] ❌ Register repositories in DI container
 
 ---
@@ -265,7 +265,7 @@
 1. **Phase 0** → Complete missing NuGet packages, DI setup, appsettings → ✅ 100%
 2. **Phase 1** → Create BaseEntity, refactor all entities → ✅ 100%
 3. **Phase 3** → Add soft delete query filter, re-migrate, seed data → 🟢 85%
-4. **Phase 4** → Repository pattern operational → 🔴 0%
+4. **Phase 4** → Repository pattern operational → 🟡 40% (interfaces done)
 5. **Phase 5** → Games CRUD controller returning data → 🔴 0%
 6. **Phase 7** → Basic RAG flow (`/api/chat/ask` with one game's rules) → 🔴 0%
 
@@ -287,7 +287,7 @@
 | 1 | Domain Entities | ✅ Done | 100% |
 | 2 | Application Layer | � In Progress | 35% |
 | 3 | Database & EF Core | ✅ Done | 95% |
-| 4 | Repository & UoW | 🔴 Not Started | 0% |
+| 4 | Repository & UoW | 🟡 In Progress | 40% |
 | 5 | API Controllers | 🔴 Not Started | 0% |
 | 6 | Auth (JWT) | 🔴 Not Started | 0% |
 | 7 | RAG Pipeline | 🔴 Not Started | 0% |

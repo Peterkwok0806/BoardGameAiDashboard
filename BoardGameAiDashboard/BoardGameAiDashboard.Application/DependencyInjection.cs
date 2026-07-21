@@ -1,5 +1,6 @@
 using System.Reflection;
 using BoardGameAiDashboard.Application.Common.Behaviors;
+using BoardGameAiDashboard.Application.Common.Interfaces;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
