@@ -20,6 +20,12 @@
   <ItemGroup>
     <Folder Include="Common\Interfaces\" />
     <Folder Include="Features\Users\Commands\RegisterUser\" />
+    <Folder Include="Features\Games\Commands\CreateGame\" />
+    <Folder Include="Features\Games\Commands\UpdateGame\" />
+    <Folder Include="Features\Games\Commands\DeleteGame\" />
+    <Folder Include="Features\Games\Queries\GetGames\" />
+    <Folder Include="Features\Games\Queries\GetGameById\" />
+    <Folder Include="Features\Games\Common\" />
   </ItemGroup>
 
 </Project>

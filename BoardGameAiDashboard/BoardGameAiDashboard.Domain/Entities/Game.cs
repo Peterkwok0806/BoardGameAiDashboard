@@ -24,4 +24,16 @@ public class Game : BaseEntity
         MinPlayers = minPlayers;
         MaxPlayers = maxPlayers;
     }
+
+    /// <summary>
+    /// Update game metadata. Enforces encapsulation — properties are private set.
+    /// </summary>
+    public void Update(string name, string description, int minPlayers, int maxPlayers)
+    {
+        Name = name;
+        Description = description;
+        MinPlayers = minPlayers;
+        MaxPlayers = maxPlayers;
+        MarkUpdated();
+    }
 }

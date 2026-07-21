@@ -62,12 +62,15 @@
   - [x] `IGenericRepository<T>` ✅
   - [x] `IUnitOfWork` ✅ (simplified — no transaction methods)
   - [x] `IDateTimeProvider` ✅
-- [ ] ❌ **Games Feature (CQRS)**:
-  - `CreateGameCommand` + Handler
-  - `UpdateGameCommand` + Handler
-  - `DeleteGameCommand` + Handler (soft delete)
-  - `GetGamesQuery` + Handler (paginated, search)
-  - `GetGameByIdQuery` + Handler
+- [x] **Games Feature (CQRS)** ✅:
+  - [x] `CreateGameCommand` + Handler + Validator + Response DTO
+  - [x] `UpdateGameCommand` + Handler + Validator + Response DTO
+  - [x] `DeleteGameCommand` + Handler (soft delete)
+  - [x] `GetGamesQuery` + Handler + `GameDto` (paginated, search)
+  - [x] `GetGameByIdQuery` + Handler + `GameDetailDto`
+  - [x] `GameMappings` AutoMapper profile
+  - [x] `NotFoundException` custom exception
+  - [x] `Game.Update()` domain method added
 - [ ] ❌ **Chat Feature (CQRS)**:
   - `SendChatMessageCommand` + Handler
   - `GetChatHistoryQuery` + Handler
