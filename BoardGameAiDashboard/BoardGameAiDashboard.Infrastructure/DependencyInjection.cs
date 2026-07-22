@@ -1,15 +1,22 @@
+using System.Text;
 using BoardGameAiDashboard.Application.Common.Interfaces;
 using BoardGameAiDashboard.Infrastructure.Common.Repositories;
 using BoardGameAiDashboard.Infrastructure.Persistence;
+using BoardGameAiDashboard.Infrastructure.Services;
 using BoardGameAiDashboard.Infrastructure.Services.Auth;
+using BoardGameAiDashboard.Infrastructure.Settings;
 using Hangfire;
 using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Embeddings;
+using Qdrant.Client;
 
 namespace BoardGameAiDashboard.Infrastructure;
 
@@ -85,6 +92,61 @@ public static class DependencyInjection
         // ── Auth Services (Password Hashing + JWT) ──────────────────────
         services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
+
+        // ── Ollama Settings ───────────────────────────────────────────────
+        services.Configure<OllamaSettings>(configuration.GetSection("Ollama"));
+
+        // ── Qdrant Settings + Client ──────────────────────────────────────
+        services.Configure<QdrantSettings>(configuration.GetSection("Qdrant"));
+        services.AddSingleton(sp =>
+        {
+            var settings = sp.GetRequiredService<IOptions<QdrantSettings>>().Value;
+            var uri = new Uri(settings.Endpoint);
+            return new QdrantClient(uri.Host, uri.Port);
+        });
+
+        // ── Semantic Kernel (Ollama LLM + Embedding) ──────────────────────
+        services.AddSingleton<Kernel>(sp =>
+        {
+            var ollamaSettings = sp.GetRequiredService<IOptions<OllamaSettings>>().Value;
+
+            var builder = Kernel.CreateBuilder();
+
+            // Chat completion via Ollama
+            builder.Services.AddOllamaChatCompletion(
+                ollamaSettings.ChatModel,
+                new Uri(ollamaSettings.Endpoint));
+
+            // Text embedding via Ollama
+            builder.Services.AddOllamaTextEmbeddingGeneration(
+                ollamaSettings.EmbeddingModel,
+                new Uri(ollamaSettings.Endpoint));
+
+            return builder.Build();
+        });
+
+        // ── Bridge Registration ──────────────────────────────────────────
+        // SK's Kernel.CreateBuilder() creates an isolated ServiceProvider.
+        // Services registered inside (IChatCompletionService, ITextEmbeddingGenerationService)
+        // are NOT visible to the outer DI container.
+        // Bridge: extract them from the Kernel's internal SP and re-register
+        // as singletons in the outer DI so they can be injected directly.
+        services.AddSingleton(sp =>
+        {
+            var kernel = sp.GetRequiredService<Kernel>();
+            return kernel.GetRequiredService<IChatCompletionService>();
+        });
+
+        services.AddSingleton(sp =>
+        {
+            var kernel = sp.GetRequiredService<Kernel>();
+            return kernel.GetRequiredService<ITextEmbeddingGenerationService>();
+        });
+
+        // ── RAG Services ──────────────────────────────────────────────────
+        services.AddScoped<IDocumentChunker, DocumentChunker>();
+        services.AddScoped<IVectorSearchService, VectorSearchService>();
+        services.AddScoped<IRagService, RagService>();
 
         return services;
     }

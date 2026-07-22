@@ -111,8 +111,14 @@
   - [x] `GameRuleChunkConfiguration` ✅
   - [x] `MatchHistoryConfiguration` ✅
 - [x] Configure soft delete global query filter (`!IsDeleted`) ✅ — Implemented via `HasQueryFilter` + shadow property (runtime-only, no snapshot) ✅
-- [x] Add EF Core migrations — `InitialCreate` migration exists ✅
-  - [x] Soft delete via shadow property + query filter — no re-migration needed ✅
+- [x] Add EF Core migrations ✅:
+  - `InitialCreate` migration ✅
+  - `AddAuthTables` migration ✅
+  - `AddChatMessageTable` migration ✅
+  - Soft delete via shadow property + query filter — no re-migration needed ✅
+- [x] **手動 ValueConverter + ValueComparer**（取代 JsonValueConverter<T>）:
+  - `Dictionary<string, string>` Converter + Comparer ✅
+  - `List<string>` Converter + Comparer ✅
 - [ ] ❌ Seed initial Games data
 
 ---
@@ -131,6 +137,23 @@
   - `IGenericRepository<>` → `GenericRepository<>` (open generic, scoped)
   - `IUnitOfWork` → `UnitOfWork` (scoped)
 - [x] Build verified — 0 errors ✅
+
+---
+
+### Refactor: ChatMessage.Sources — JSON → EF Core ValueConversion ✅
+
+- [x] **ChatMessage.Sources**: `string SourcesJson` → `List<string> Sources` ✅
+  - 建構子改收 `List<string>`；新增無參數 `protected` EF Core 建構子
+  - EF Core ValueConverter 自動處理 JSON ↔ `List<string>` 轉換
+- [x] **ApplicationDbContext**: 手動 `CreateJsonConverter()` / `CreateJsonComparer()` + `CreateJsonListConverter()` / `CreateJsonListComparer()`，取代 `JsonValueConverter<T>` / `JsonValueComparer<T>`（避免 `Microsoft.EntityFrameworkCore.Storage.ValueConversion` 命名空間衝突）
+  - `GameCharacter.CustomProperties`、`GameCard.CardProperties`、`MatchHistory.GameFeatures`：`Dictionary<string, string>` Converter + Comparer ✅
+  - `ChatMessage.Sources`：`List<string>` Converter + Comparer ✅
+- [x] **IUnitOfWork** + **UnitOfWork**: 新增 `ChatMessages` repository 屬性 ✅
+- [x] **Chat Handlers 重構**: 全部改用 `_unitOfWork.ChatMessages`，移除 `IGenericRepository<ChatMessage>` 直接注入
+  - `SendChatMessageCommandHandler`: 直接傳 `List<string>`（無需手動序列化）✅
+  - `GetChatHistoryQueryHandler`、`GetChatHistoryByGameQueryHandler`: 注入 `IUnitOfWork` ✅
+- [x] **EF Core Migration**: `AddChatMessageTable` migration 建立完成 ✅
+- [x] **Build 驗證** — 0 errors ✅
 
 ---
 
@@ -222,22 +245,35 @@ if (response.data.success) { /* ok */ } else { /* error from response.data.data 
 
 ---
 
-## Phase 7: RAG Pipeline (Core Feature) — 🔴 0% Not Started
+## Phase 7: RAG Pipeline (Core Feature) — 🟡 60% Done
 
-- [ ] ❌ Implement `IEmbeddingService` (Azure OpenAI `text-embedding-3-small`)
-- [ ] ❌ Setup Qdrant client and `game_rules` collection (1536-dim, Cosine)
-- [ ] ❌ Implement `IVectorDbService` / `QdrantVectorSearchService` with hybrid search
-- [ ] ❌ Build `RuleIngestionService`:
-  - PDF → semantic chunking → embedding → Qdrant store
-  - Store `QdrantPointId` in `GameRuleChunk` entity
-- [ ] ❌ Implement `RagOrchestratorService`:
-  - Embed question → Qdrant search (top-K) → build context → LLM completion
-  - Support Cantonese/Chinese/English responses
-  - Include source citations (SectionTitle + GameName)
-- [ ] ❌ Wire up `ChatController` with `/api/chat/ask` endpoint
-- [ ] ❌ Add metadata filtering (GameId, SectionTitle) to vector searches
+- [x] ~~Implement `IEmbeddingService`~~ → Replaced by Semantic Kernel's `ITextEmbeddingGenerationService` (Ollama `nomic-embed-text`) ✅
+- [x] Setup Qdrant client + `game_rules` collection (768-dim, Cosine, Ollama native) ✅
+- [x] Implement `IVectorSearchService` / `VectorSearchService` with metadata filtering ✅
+- [x] Build `IDocumentChunker` / `DocumentChunker`:
+  - PDF text extraction → semantic chunking → token-aware splitting ✅
+- [x] Implement `IRagService` / `RagService`:
+  - Embed question → Qdrant search (top-K) → build context → LLM completion ✅
+  - Support Cantonese/Chinese/English responses (language auto-detect) ✅
+  - Include source citations (SectionTitle) ✅
+- [x] Wire up `SendChatMessageCommandHandler` with real RAG pipeline ✅
+- [x] Add metadata filtering (GameId) to vector searches ✅
+- [x] Settings: `OllamaSettings` (Endpoint, ChatModel, EmbeddingModel) ✅
+- [x] Settings: `QdrantSettings` (Endpoint, CollectionName, VectorDimension) ✅
+- [x] DI registration: QdrantClient, Kernel (SK), Ollama services, RAG services ✅
+- [x] NuGet: OllamaSharp 5.4.12 added for native Ollama SK integration ✅
+- [x] `appsettings.json`: Ollama + Qdrant sections configured ✅
+- [x] `SendChatMessageCommand` updated: added optional `GameId` field ✅
+- [x] Build verified — 0 errors ✅
 
-> NuGet packages installed: SemanticKernel ✅, Qdrant.Client ✅ — but zero code exists.
+> Stack changed: Azure OpenAI → **Ollama** (local LLM). SK Kernel wired with `AddOllamaChatCompletion` + `AddOllamaTextEmbeddingGeneration`.
+
+### Remaining (Phase 7)
+- [ ] ❌ PDF ingestion pipeline (upload PDF → chunk → embed → store in Qdrant)
+- [ ] ❌ Store `QdrantPointId` in `GameRuleChunk` entity
+- [ ] ❌ `GameRuleChunk` → Qdrant sync service
+- [x] Chat history persistence (save to DB) ✅ — EF Core ValueConversion for `List<string>` Sources
+- [ ] ❌ Frontend chat UI integration
 
 ---
 
@@ -367,7 +403,7 @@ if (response.data.success) { /* ok */ } else { /* error from response.data.data 
 | 4 | Repository & UoW | ✅ Done | 100% |
 | 5 | API Controllers & Middleware | ✅ Done | 100% |
 | 6 | Auth (JWT) | ✅ Done | 100% |
-| 7 | RAG Pipeline | 🔴 Not Started | 0% |
+| 7 | RAG Pipeline | 🟡 In Progress | 60% |
 | 8 | ML.NET | 🔴 Not Started | 0% |
 | 9 | Redis Caching | 🟡 Partial | 20% |
 | 10 | Hangfire | 🟡 Partial | 33% |

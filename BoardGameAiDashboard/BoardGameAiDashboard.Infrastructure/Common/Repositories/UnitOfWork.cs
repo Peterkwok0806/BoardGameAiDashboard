@@ -19,6 +19,7 @@ public class UnitOfWork : IUnitOfWork
     private IGenericRepository<MatchHistory>? _matches;
     private IGenericRepository<User>? _users;
     private IGenericRepository<RefreshToken>? _refreshTokens;
+    private IGenericRepository<ChatMessage>? _chatMessages;
 
     public UnitOfWork(ApplicationDbContext context)
     {
@@ -52,6 +53,10 @@ public class UnitOfWork : IUnitOfWork
     /// <inheritdoc />
     public IGenericRepository<RefreshToken> RefreshTokens =>
         _refreshTokens ??= new GenericRepository<RefreshToken>(_context);
+
+    /// <inheritdoc />
+    public IGenericRepository<ChatMessage> ChatMessages =>
+        _chatMessages ??= new GenericRepository<ChatMessage>(_context);
 
     /// <inheritdoc />
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

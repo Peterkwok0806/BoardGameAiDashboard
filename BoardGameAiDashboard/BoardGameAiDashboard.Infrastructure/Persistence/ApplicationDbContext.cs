@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 using BoardGameAiDashboard.Domain.Common;
 using BoardGameAiDashboard.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +20,7 @@ namespace BoardGameAiDashboard.Infrastructure.Persistence
         public DbSet<MatchHistory> MatchHistories => Set<MatchHistory>();
         public DbSet<User> Users => Set<User>();
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+        public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -121,7 +117,23 @@ namespace BoardGameAiDashboard.Infrastructure.Persistence
                 entity.HasQueryFilter(e => e.IsDeleted == false);
             });
 
-            // 7. Refresh token table configuration (JWT token rotation)
+            // 7. Chat message table configuration (RAG chat history)
+            modelBuilder.Entity<ChatMessage>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Content).IsRequired();
+                entity.Property(e => e.UserId).HasMaxLength(128);
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.GameId);
+
+                entity.Property(e => e.Sources)
+                      .HasConversion(CreateJsonListConverter())
+                      .Metadata.SetValueComparer(CreateJsonListComparer());
+
+                entity.HasQueryFilter(e => e.IsDeleted == false);
+            });
+
+            // 8. Refresh token table configuration (JWT token rotation)
             modelBuilder.Entity<RefreshToken>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -155,6 +167,24 @@ namespace BoardGameAiDashboard.Infrastructure.Persistence
                 (c1, c2) => JsonSerializer.Serialize(c1, (JsonSerializerOptions)null!) == JsonSerializer.Serialize(c2, (JsonSerializerOptions)null!),
                 c => c == null ? 0 : JsonSerializer.Serialize(c, (JsonSerializerOptions)null!).GetHashCode(),
                 c => JsonSerializer.Deserialize<Dictionary<string, string>>(JsonSerializer.Serialize(c, (JsonSerializerOptions)null!), (JsonSerializerOptions)null!)!
+            );
+        }
+
+        private static ValueConverter<List<string>, string> CreateJsonListConverter()
+        {
+            return new ValueConverter<List<string>, string>(
+                v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
+                v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null!)
+                     ?? new List<string>()
+            );
+        }
+
+        private static ValueComparer<List<string>> CreateJsonListComparer()
+        {
+            return new ValueComparer<List<string>>(
+                (c1, c2) => JsonSerializer.Serialize(c1, (JsonSerializerOptions)null!) == JsonSerializer.Serialize(c2, (JsonSerializerOptions)null!),
+                c => c == null ? 0 : JsonSerializer.Serialize(c, (JsonSerializerOptions)null!).GetHashCode(),
+                c => JsonSerializer.Deserialize<List<string>>(JsonSerializer.Serialize(c, (JsonSerializerOptions)null!), (JsonSerializerOptions)null!)!
             );
         }
 

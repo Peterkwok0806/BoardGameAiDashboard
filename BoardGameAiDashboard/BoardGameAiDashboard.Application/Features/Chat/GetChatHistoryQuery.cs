@@ -15,6 +15,15 @@ public sealed record GetChatHistoryQuery : IRequest<List<ChatMessageDto>>
     public int PageSize { get; init; } = 50;
 }
 
+/// <summary>
+/// CQRS query to retrieve chat history filtered by a specific game.
+/// </summary>
+public sealed record GetChatHistoryByGameQuery : IRequest<List<ChatMessageDto>>
+{
+    /// <summary>The game identifier.</summary>
+    public Guid GameId { get; init; }
+}
+
 /// <summary>DTO representing a single chat message.</summary>
 public sealed record ChatMessageDto
 {

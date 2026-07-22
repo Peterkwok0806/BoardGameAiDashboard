@@ -5,30 +5,28 @@ using MediatR;
 namespace BoardGameAiDashboard.Application.Features.Chat;
 
 /// <summary>
-/// Retrieves chat history for a given user, ordered by creation time ascending.
+/// Retrieves chat history for a specific game, ordered by creation time ascending.
 /// </summary>
-internal sealed class GetChatHistoryQueryHandler
-    : IRequestHandler<GetChatHistoryQuery, List<ChatMessageDto>>
+internal sealed class GetChatHistoryByGameQueryHandler
+    : IRequestHandler<GetChatHistoryByGameQuery, List<ChatMessageDto>>
 {
     private readonly IUnitOfWork _unitOfWork;
 
-    public GetChatHistoryQueryHandler(IUnitOfWork unitOfWork)
+    public GetChatHistoryByGameQueryHandler(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
     }
 
     public async Task<List<ChatMessageDto>> Handle(
-        GetChatHistoryQuery request, CancellationToken cancellationToken)
+        GetChatHistoryByGameQuery request, CancellationToken cancellationToken)
     {
         var (items, _) = await _unitOfWork.ChatMessages.GetPagedAsync(
             pageNumber: 1,
-            pageSize: request.PageSize,
-            filter: m => m.UserId == request.UserId,
+            pageSize: 200,
+            filter: m => m.GameId == request.GameId,
             cancellationToken: cancellationToken);
 
-        // GetPagedAsync uses OrderByDescending(CreatedAt) by default,
-        // reverse to oldest-first for display
-        var result = items
+        return items
             .OrderBy(m => m.CreatedAt)
             .Select(m => new ChatMessageDto
             {
@@ -38,7 +36,5 @@ internal sealed class GetChatHistoryQueryHandler
                 CreatedAt = m.CreatedAt
             })
             .ToList();
-
-        return result;
     }
 }

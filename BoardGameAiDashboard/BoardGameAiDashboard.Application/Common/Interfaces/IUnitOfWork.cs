@@ -30,6 +30,9 @@ public interface IUnitOfWork : IDisposable
     /// <summary>Refresh token repository (JWT refresh flow).</summary>
     IGenericRepository<RefreshToken> RefreshTokens { get; }
 
+    /// <summary>Chat message repository (RAG chat history).</summary>
+    IGenericRepository<ChatMessage> ChatMessages { get; }
+
     /// <summary>
     /// Persist all pending changes across all repositories in a single batch.
     /// </summary>

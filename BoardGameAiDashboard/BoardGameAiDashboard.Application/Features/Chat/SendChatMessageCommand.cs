@@ -4,10 +4,12 @@ namespace BoardGameAiDashboard.Application.Features.Chat;
 
 /// <summary>
 /// CQRS command to send a chat message and receive an AI-generated response.
-/// Planned for Phase 7 (RAG Chat).
 /// </summary>
 public sealed record SendChatMessageCommand : IRequest<SendChatMessageCommandResponse>
 {
+    /// <summary>The user identifier.</summary>
+    public Guid UserId { get; init; }
+
     /// <summary>The user's chat message.</summary>
     public string Message { get; init; } = string.Empty;
 
@@ -18,9 +20,12 @@ public sealed record SendChatMessageCommand : IRequest<SendChatMessageCommandRes
 /// <summary>Response DTO for the chat command.</summary>
 public sealed record SendChatMessageCommandResponse
 {
-    /// <summary>The AI-generated response message.</summary>
-    public string Reply { get; init; } = string.Empty;
+    /// <summary>The user message details.</summary>
+    public ChatMessageDto UserMessage { get; init; } = default!;
 
-    /// <summary>Sources used to generate the response.</summary>
+    /// <summary>The AI-generated response details.</summary>
+    public ChatMessageDto AiMessage { get; init; } = default!;
+
+    /// <summary>Source section titles used by RAG.</summary>
     public List<string> Sources { get; init; } = new();
 }
