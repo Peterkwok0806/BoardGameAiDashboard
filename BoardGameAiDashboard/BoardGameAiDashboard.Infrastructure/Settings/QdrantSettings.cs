@@ -15,6 +15,6 @@ public sealed class QdrantSettings
     /// <summary>Collection name for game-rule embeddings.</summary>
     public string CollectionName { get; set; } = "game_rules";
 
-    /// <summary>Vector dimension — must match the embedding model output (nomic-embed-text = 768).</summary>
-    public int VectorDimension { get; set; } = 768;
+    /// <summary>Vector dimension — must match the embedding model output (mxbai-embed-large = 1024).</summary>
+    public int VectorDimension { get; set; } = 1024;
 }
