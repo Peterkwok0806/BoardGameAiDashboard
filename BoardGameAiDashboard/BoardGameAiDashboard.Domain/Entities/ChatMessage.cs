@@ -19,7 +19,6 @@ public class ChatMessage : BaseEntity
 
     /// <summary>
     /// Source chunk section titles used by RAG.
-    /// Persisted as JSON array via EF Core 8 .ToJson() — no manual serialization needed.
     /// </summary>
     public List<string> Sources { get; private set; } = new();
 
