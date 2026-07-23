@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BoardGameAiDashboard.Api.Controllers;
 
 /// <summary>
-/// AI Chat endpoints — Phase 3 placeholder (RAG integration).
+/// AI Chat endpoints — multi-turn RAG with query rewriting and conversation history.
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -20,6 +20,8 @@ public sealed class ChatController : ControllerBase
 
     /// <summary>
     /// Sends a chat message and receives an AI-generated response.
+    /// Pass a ConversationId to continue an existing conversation (three-stage RAG pipeline).
+    /// Omit ConversationId to start a new conversation.
     /// </summary>
     [HttpPost("send")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -32,7 +34,24 @@ public sealed class ChatController : ControllerBase
     }
 
     /// <summary>
-    /// Retrieves chat history for a specific user.
+    /// Retrieves conversation history for a specific chat session.
+    /// </summary>
+    [HttpGet("conversation/{conversationId:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetConversationHistory(
+        Guid conversationId,
+        CancellationToken ct = default)
+    {
+        var query = new GetConversationHistoryQuery
+        {
+            ConversationId = conversationId
+        };
+        var result = await _sender.Send(query, ct);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Retrieves chat history for a specific user (all conversations).
     /// </summary>
     [HttpGet("history/{userId:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]

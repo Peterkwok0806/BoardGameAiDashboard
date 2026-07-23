@@ -143,9 +143,14 @@ public static class DependencyInjection
             return kernel.GetRequiredService<ITextEmbeddingGenerationService>();
         });
 
+        // ── PDF Parsing ───────────────────────────────────────────────────
+        services.AddScoped<IPdfParser, PdfPigPdfParser>();
+
         // ── RAG Services ──────────────────────────────────────────────────
         services.AddScoped<IDocumentChunker, DocumentChunker>();
         services.AddScoped<IVectorSearchService, VectorSearchService>();
+        services.AddScoped<IQueryRewriter, LlmQueryRewriter>();
+        services.AddScoped<IDocumentIngestionService, DocumentIngestionService>();
         services.AddScoped<IRagService, RagService>();
 
         return services;

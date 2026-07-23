@@ -125,6 +125,7 @@ namespace BoardGameAiDashboard.Infrastructure.Persistence
                 entity.Property(e => e.UserId).HasMaxLength(128);
                 entity.HasIndex(e => e.UserId);
                 entity.HasIndex(e => e.GameId);
+                entity.HasIndex(e => e.ConversationId);
 
                 entity.Property(e => e.Sources)
                       .HasConversion(CreateJsonListConverter())

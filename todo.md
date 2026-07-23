@@ -49,7 +49,7 @@
 
 ---
 
-## Phase 2: Application Layer (CQRS + Validation) — 🟡 75% Done
+## Phase 2: Application Layer (CQRS + Validation) — ✅ 100% Done
 
 - [x] Setup MediatR with assembly scanning (`IApplicationAssemblyMarker`) ✅
 - [x] Create `ApiResult<T>` response wrapper (see `architecture.md` Section 7.5) ✅
@@ -71,9 +71,11 @@
   - [x] `GameMappings` AutoMapper profile
   - [x] `NotFoundException` custom exception
   - [x] `Game.Update()` domain method added
-- [x] **Chat Feature (CQRS)** — Placeholder ✅:
-  - [x] `SendChatMessageCommand` + Handler (placeholder — returns stub response)
-  - [x] `GetChatHistoryQuery` + Handler (placeholder — returns empty list)
+- [x] **Chat Feature (CQRS)** — Complete (Real RAG) ✅:
+  - [x] `SendChatMessageCommand` + Handler (real RAG pipeline via `IRagService`) ✅
+  - [x] `GetConversationHistoryQuery` + Handler ✅
+  - [x] `GetChatHistoryByGameQuery` + Handler ✅
+  - [x] `IngestGameRulesCommand` + Handler (PDF upload → ingest via `IDocumentIngestionService`) ✅
 - [x] **Predictions Feature (CQRS)** — Placeholder ✅:
   - [x] `GetWinRateQuery` + Handler (placeholder — returns stub response)
   - [x] `GetChurnPredictionQuery` + Handler (placeholder — returns stub response)
@@ -94,6 +96,7 @@
   - [x] `GetMatchHistoryQuery` + Handler (placeholder — returns empty list)
 
 > Note: `Features/Users/Commands/RegisterUser/` folder exists but is **empty**.
+> Chat Feature upgraded from placeholder to full RAG integration.
 
 ---
 
@@ -245,7 +248,7 @@ if (response.data.success) { /* ok */ } else { /* error from response.data.data 
 
 ---
 
-## Phase 7: RAG Pipeline (Core Feature) — 🟡 60% Done
+## Phase 7: RAG Pipeline (Core Feature) — 🟢 90% Done
 
 - [x] ~~Implement `IEmbeddingService`~~ → Replaced by Semantic Kernel's `ITextEmbeddingGenerationService` (Ollama `nomic-embed-text`) ✅
 - [x] Setup Qdrant client + `game_rules` collection (768-dim, Cosine, Ollama native) ✅
@@ -268,11 +271,20 @@ if (response.data.success) { /* ok */ } else { /* error from response.data.data 
 
 > Stack changed: Azure OpenAI → **Ollama** (local LLM). SK Kernel wired with `AddOllamaChatCompletion` + `AddOllamaTextEmbeddingGeneration`.
 
-### Remaining (Phase 7)
-- [ ] ❌ PDF ingestion pipeline (upload PDF → chunk → embed → store in Qdrant)
-- [ ] ❌ Store `QdrantPointId` in `GameRuleChunk` entity
-- [ ] ❌ `GameRuleChunk` → Qdrant sync service
+- [x] **PDF Ingestion Pipeline** — Full implementation ✅:
+  - [x] `IPdfParser` interface + `PdfPigPdfParser` (using PdfPig library) ✅
+  - [x] `IDocumentChunker` interface + `DocumentChunker` (PDF → segments → chunks with metadata) ✅
+  - [x] `IDocumentIngestionService` interface + `DocumentIngestionService` (parse → chunk → embed → store in Qdrant + EF Core) ✅
+  - [x] Store `QdrantPointId` in `GameRuleChunk` entity ✅
+  - [x] `GameRuleChunk` → Qdrant sync via `VectorSearchService` ✅
+  - [x] Re-ingestion replaces all existing chunks for the same game ✅
+- [x] **Query Rewriting** — `IQueryRewriter` / `LlmQueryRewriter` (LLM-powered, supports zh/yue/en) ✅
 - [x] Chat history persistence (save to DB) ✅ — EF Core ValueConversion for `List<string>` Sources
+- [x] **GameRulesController** — PDF upload endpoint (`POST /api/gamrules/{gameId}/ingest`) ✅
+- [x] EF Core migration `AddGameRuleChunk` created ✅
+- [x] `ChatController` upgraded with real RAG (GameId support, conversation history, sources) ✅
+
+### Remaining (Phase 7)
 - [ ] ❌ Frontend chat UI integration
 
 ---
@@ -380,9 +392,9 @@ if (response.data.success) { /* ok */ } else { /* error from response.data.data 
 3. **Phase 3** → Add soft delete query filter, re-migrate, seed data → 🟢 95%
 4. **Phase 4** → Repository pattern operational → ✅ 100%
 5. **Phase 5** → Games CRUD + middleware + all controllers → ✅ 100%
-6. **Phase 7** → Basic RAG flow (`/api/chat/ask` with one game's rules) → 🔴 0%
+6. **Phase 7** → RAG flow + PDF ingestion + Chat API → 🟢 90% (only frontend integration remains)
 
-> 💡 **Strategy**: Get a thin vertical slice working first (Game CRUD + RAG Chat), then expand horizontally.
+> 💡 **Strategy**: ✅ Thin vertical slice (Game CRUD + RAG Chat + PDF Upload) fully working. Next: expand to Angular frontend or other phases.
 
 ---
 
@@ -403,7 +415,7 @@ if (response.data.success) { /* ok */ } else { /* error from response.data.data 
 | 4 | Repository & UoW | ✅ Done | 100% |
 | 5 | API Controllers & Middleware | ✅ Done | 100% |
 | 6 | Auth (JWT) | ✅ Done | 100% |
-| 7 | RAG Pipeline | 🟡 In Progress | 60% |
+| 7 | RAG Pipeline | 🟢 Done (90%) | 90% |
 | 8 | ML.NET | 🔴 Not Started | 0% |
 | 9 | Redis Caching | 🟡 Partial | 20% |
 | 10 | Hangfire | 🟡 Partial | 33% |
