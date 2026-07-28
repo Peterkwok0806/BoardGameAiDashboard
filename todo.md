@@ -1,7 +1,7 @@
 # 🎲 BoardGame AI Dashboard — Development TODO
 
 > **Reference**: `architecture.md` — Single source of truth for architecture decisions.  
-> **Stack**: .NET 8 + Angular 19 + SQL Server + Qdrant + Redis + Azure OpenAI  
+> **Stack**: .NET 8 + Angular 19 + SQL Server + Qdrant + Redis + **Ollama** (local LLM)  
 > **Pattern**: Clean Architecture + CQRS (MediatR) + RAG + ML.NET
 
 ---
@@ -248,7 +248,7 @@ if (response.data.success) { /* ok */ } else { /* error from response.data.data 
 
 ---
 
-## Phase 7: RAG Pipeline (Core Feature) — 🟢 90% Done
+## Phase 7: RAG Pipeline (Core Feature) — ✅ 100% Done
 
 - [x] ~~Implement `IEmbeddingService`~~ → Replaced by Semantic Kernel's `ITextEmbeddingGenerationService` (Ollama `nomic-embed-text`) ✅
 - [x] Setup Qdrant client + `game_rules` collection (768-dim, Cosine, Ollama native) ✅
@@ -285,7 +285,7 @@ if (response.data.success) { /* ok */ } else { /* error from response.data.data 
 - [x] `ChatController` upgraded with real RAG (GameId support, conversation history, sources) ✅
 
 ### Remaining (Phase 7)
-- [ ] ❌ Frontend chat UI integration
+- [x] **Frontend Chat UI integration** ✅ — `ChatContainerComponent` implemented with full RAG chatbot UI
 
 ---
 
@@ -340,20 +340,49 @@ if (response.data.success) { /* ok */ } else { /* error from response.data.data 
 
 ---
 
-## Phase 12: Angular Frontend — 🔴 0% Not Started
+## Phase 12: Angular Frontend — 🟡 65% In Progress
 
-- [ ] ❌ Setup Angular 19 project with Tailwind CSS
-- [ ] ❌ **Core Module**:
-  - Auth Guard + JWT Interceptor
-  - HTTP Service (API calls with `ApiResult` handling)
-  - SignalR Service (real-time connection)
-- [ ] ❌ **Feature Modules**:
+> **Core infrastructure done**: services, guards, interceptors, models all exist.
+
+### ✅ Completed
+- [x] Angular 19 project setup with Tailwind CSS ✅
+- [x] **Core Module**:
+  - [x] Auth Guard (`auth.guard.ts`) ✅
+  - [x] JWT Interceptor (`auth.interceptor.ts`) ✅
+  - [x] HTTP Interceptor with `ApiResult` handling (`api.interceptor.ts`) ✅
+  - [x] Auth Service (`auth.service.ts`) ✅
+  - [x] Game Service (`game.service.ts`) ✅
+  - [x] Chat Service (`chat.service.ts`) ✅
+  - [x] Match Service (`match.service.ts`) ✅
+  - [x] Prediction Service (`prediction.service.ts`) ✅
+- [x] **Models**:
+  - [x] `api-response.model.ts` ✅
+  - [x] `auth.model.ts` ✅
+  - [x] `game.model.ts` ✅
+  - [x] `chat.model.ts` ✅
+  - [x] `match.model.ts` ✅
+  - [x] `prediction.model.ts` ✅
+- [x] **App Component & Routing** (`app.component.ts`, `app.routes.ts`) ✅
+- [x] **Feature: Auth (Login/Register)** ✅:
+  - [x] Login component (`login.component.ts/html/css`) ✅
+  - [x] Login/Register toggle ✅
+  - [x] Error handling ✅
+- [x] **Feature: Chat (RAG Chatbot)** ✅:
+  - [x] Chat container component (`chat-container.component.ts/html/css`) ✅
+  - [x] Multi-turn conversation with AI ✅
+  - [x] Game context selector (for RAG) ✅
+  - [x] Source citations display ✅
+  - [x] Loading state with typing indicator ✅
+  - [x] Auto-scroll to latest message ✅
+  - [x] Suggestion chips for quick questions ✅
+
+### ❌ Remaining
+- [ ] **Feature Components**:
   - Dashboard (overview stats, charts with ng2-charts)
   - Games (CRUD, game detail page)
-  - Chat (RAG chatbot interface with source citations)
   - Predictions (win rate, churn, What-If simulation)
   - Match History (record & view matches)
-- [ ] ❌ **Shared Components**:
+- [ ] **Shared Components**:
   - Navbar, Sidebar, Footer
   - Data Table with Pagination
   - Loading Spinner, Error Alert
@@ -392,9 +421,9 @@ if (response.data.success) { /* ok */ } else { /* error from response.data.data 
 3. **Phase 3** → Add soft delete query filter, re-migrate, seed data → 🟢 95%
 4. **Phase 4** → Repository pattern operational → ✅ 100%
 5. **Phase 5** → Games CRUD + middleware + all controllers → ✅ 100%
-6. **Phase 7** → RAG flow + PDF ingestion + Chat API → 🟢 90% (only frontend integration remains)
+6. **Phase 7** → RAG flow + PDF ingestion + Chat API + Frontend UI → ✅ 100%
 
-> 💡 **Strategy**: ✅ Thin vertical slice (Game CRUD + RAG Chat + PDF Upload) fully working. Next: expand to Angular frontend or other phases.
+> 💡 **Strategy**: ✅ Thin vertical slice (Game CRUD + RAG Chat + PDF Upload + Angular Core Services) fully working. Next: expand Angular feature components or other phases.
 
 ---
 
@@ -420,7 +449,7 @@ if (response.data.success) { /* ok */ } else { /* error from response.data.data 
 | 9 | Redis Caching | 🟡 Partial | 20% |
 | 10 | Hangfire | 🟡 Partial | 33% |
 | 11 | SignalR | 🔴 Not Started | 0% |
-| 12 | Angular Frontend | 🔴 Not Started | 0% |
+| 12 | Angular Frontend | 🟡 In Progress | 65% |
 | 13 | Testing & Deployment | 🔴 Not Started | 0% |
 
 ---

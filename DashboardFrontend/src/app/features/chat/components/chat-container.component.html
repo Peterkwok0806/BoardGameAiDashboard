@@ -1,0 +1,186 @@
+<!-- Chat Container Component -->
+<div class="chat-container">
+  <!-- Header -->
+  <div class="chat-header">
+    <h2>🎲 AI Chat</h2>
+    <div class="header-actions">
+      @if (hasMessages()) {
+        <button
+          type="button"
+          class="btn-clear"
+          (click)="clearChat()"
+          title="Clear chat history"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18"></path>
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+          </svg>
+          Clear
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Game Context Selector -->
+  <div class="game-selector">
+    <label for="game-select">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+      </svg>
+      Game Context
+    </label>
+    <select
+      id="game-select"
+      [ngModel]="selectedGameId()"
+      (ngModelChange)="selectGame($event)"
+      class="game-select-input"
+    >
+      <option [value]="undefined">— No specific game (general chat) —</option>
+      @for (game of games(); track game.id) {
+        <option [value]="game.id">{{ game.name }}</option>
+      }
+    </select>
+  </div>
+
+  <!-- Messages Area -->
+  <div class="messages-area" #messageContainer>
+    @if (!hasMessages() && !isLoading()) {
+      <!-- Empty State -->
+      <div class="empty-state">
+        <div class="empty-icon">💬</div>
+        <h3>Start a conversation</h3>
+        <p>Ask questions about board game rules, strategies, or anything else!</p>
+        <div class="suggestion-chips">
+          <button
+            type="button"
+            class="chip"
+            (click)="setMessageAndFocus('What are the basic rules?')"
+          >
+            Basic rules
+          </button>
+          <button
+            type="button"
+            class="chip"
+            (click)="setMessageAndFocus('How do I win?')"
+          >
+            How to win
+          </button>
+          <button
+            type="button"
+            class="chip"
+            (click)="setMessageAndFocus('Any strategy tips?')"
+          >
+            Strategy tips
+          </button>
+        </div>
+      </div>
+    } @else {
+      <!-- Message List -->
+      @for (message of messages(); track message.id) {
+        <div
+          class="message"
+          [class.user-message]="!message.isFromAi"
+          [class.ai-message]="message.isFromAi"
+        >
+          <div class="message-avatar">
+            @if (message.isFromAi) {
+              <span class="avatar-icon ai-avatar">🤖</span>
+            } @else {
+              <span class="avatar-icon user-avatar">
+                {{ currentUserDisplayName() }}
+              </span>
+            }
+          </div>
+          <div class="message-content">
+            <div class="message-bubble">
+              {{ message.content }}
+            </div>
+            <div class="message-time">
+              {{ formatTime(message.createdAt) }}
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Loading Indicator -->
+      @if (isLoading()) {
+        <div class="message ai-message">
+          <div class="message-avatar">
+            <span class="avatar-icon ai-avatar">🤖</span>
+          </div>
+          <div class="message-content">
+            <div class="message-bubble loading">
+              <div class="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    }
+
+    <!-- Error Message -->
+    @if (error()) {
+      <div class="error-banner">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        {{ error() }}
+      </div>
+    }
+  </div>
+
+  <!-- Sources Panel -->
+  @if (sources().length > 0) {
+    <div class="sources-panel">
+      <h4>
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+        </svg>
+        Sources
+      </h4>
+      <ul class="sources-list">
+        @for (source of sources(); track $index) {
+          <li>{{ source }}</li>
+        }
+      </ul>
+    </div>
+  }
+
+  <!-- Input Area -->
+  <div class="input-area">
+    <div class="input-wrapper">
+      <textarea
+        #messageInput
+        [ngModel]="messageText()"
+        (ngModelChange)="setMessageText($event)"
+        (keydown)="onKeydown($event)"
+        (input)="autoResize($event)"
+        placeholder="Type your message... (Enter to send, Shift+Enter for new line)"
+        rows="1"
+        class="message-input"
+        [disabled]="isLoading()"
+      ></textarea>
+      <button
+        type="button"
+        class="btn-send"
+        (click)="sendMessage()"
+        [disabled]="!messageText().trim() || isLoading()"
+        title="Send message"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+    <div class="input-hint">
+      Press Enter to send, Shift+Enter for new line
+    </div>
+  </div>
+</div>
