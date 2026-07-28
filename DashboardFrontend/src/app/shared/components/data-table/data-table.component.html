@@ -1,0 +1,134 @@
+<div class="data-table-wrapper">
+  <!-- Table -->
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          @for (column of columns(); track column.key) {
+            <th
+              [class.sortable]="column.sortable"
+              [class.sorted]="isSorted(column)"
+              [style.width]="column.width || 'auto'"
+              (click)="sortBy(column)"
+            >
+              <span class="th-content">
+                {{ column.label }}
+                @if (column.sortable) {
+                  <span class="sort-icon">
+                    @if (isSorted(column) && sortDirection() === 'asc') {
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="18 15 12 9 6 15"></polyline>
+                      </svg>
+                    } @else if (isSorted(column) && sortDirection() === 'desc') {
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    } @else {
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m7 15 5 5 5-5"></path>
+                        <path d="m7 9 5-5 5 5"></path>
+                      </svg>
+                    }
+                  </span>
+                }
+              </span>
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          <tr class="loading-row">
+            <td [attr.colspan]="columns().length">
+              <div class="loading-placeholder">
+                <div class="skeleton-row"></div>
+              </div>
+            </td>
+          </tr>
+        } @else if (!hasData()) {
+          <tr class="empty-row">
+            <td [attr.colspan]="columns().length">
+              <div class="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                  <polyline points="13 2 13 9 20 9"></polyline>
+                </svg>
+                <p>No data available</p>
+              </div>
+            </td>
+          </tr>
+        } @else {
+          @for (item of paginatedData(); track $index) {
+            <tr (click)="onRowClick(item)">
+              @for (column of columns(); track column.key) {
+                <td>{{ getCellValue(item, column.key as string) }}</td>
+              }
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  @if (hasData() && hasPages()) {
+    <div class="pagination">
+      <div class="pagination-info">
+        Showing {{ (currentPage() - 1) * pageSize() + 1 }} to
+        {{ currentPage() * pageSize() > totalItems() ? totalItems() : currentPage() * pageSize() }} of
+        {{ totalItems() }} entries
+      </div>
+
+      <div class="pagination-controls">
+        <select
+          class="page-size-select"
+          [ngModel]="pageSize()"
+          (ngModelChange)="changePageSize($event)"
+        >
+          @for (size of pageSizeOptions(); track size) {
+            <option [value]="size">{{ size }} per page</option>
+          }
+        </select>
+
+        <div class="page-buttons">
+          <button
+            type="button"
+            class="page-btn"
+            [disabled]="currentPage() === 1"
+            (click)="goToPage(currentPage() - 1)"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+
+          @for (page of pageNumbers(); track $index) {
+            @if (page === '...') {
+              <span class="page-ellipsis">...</span>
+            } @else {
+              <button
+                type="button"
+                class="page-btn"
+                [class.active]="page === currentPage()"
+                (click)="goToPage(page as number)"
+              >
+                {{ page }}
+              </button>
+            }
+          }
+
+          <button
+            type="button"
+            class="page-btn"
+            [disabled]="currentPage() === totalPages()"
+            (click)="goToPage(currentPage() + 1)"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

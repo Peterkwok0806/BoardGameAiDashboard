@@ -1,0 +1,69 @@
+<aside class="sidebar" [class.collapsed]="isCollapsed()">
+  <!-- Toggle Button -->
+  <button
+    type="button"
+    class="toggle-btn"
+    (click)="toggleCollapse()"
+    [attr.aria-label]="isCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      @if (isCollapsed()) {
+        <polyline points="9 18 15 12 9 6"></polyline>
+      } @else {
+        <polyline points="15 18 9 12 15 6"></polyline>
+      }
+    </svg>
+  </button>
+
+  <!-- Navigation -->
+  <nav class="sidebar-nav">
+    <!-- Dashboard Section -->
+    @if (dashboardLinks().length > 0) {
+      <div class="nav-section">
+        @if (!isCollapsed()) {
+          <span class="nav-section-title">Overview</span>
+        }
+        @for (link of dashboardLinks(); track link.path) {
+          <a
+            [routerLink]="link.path"
+            routerLinkActive="active"
+            class="nav-item"
+            [attr.title]="isCollapsed() ? link.label : null"
+          >
+            <span class="nav-icon" [innerHTML]="getIconSvg(link.icon)"></span>
+            @if (!isCollapsed()) {
+              <span class="nav-label">{{ link.label }}</span>
+            }
+          </a>
+        }
+      </div>
+    }
+
+    <!-- Main Navigation -->
+    <div class="nav-section">
+      @if (!isCollapsed()) {
+        <span class="nav-section-title">Menu</span>
+      }
+      @for (link of navLinks(); track link.path) {
+        <a
+          [routerLink]="link.path"
+          routerLinkActive="active"
+          class="nav-item"
+          [attr.title]="isCollapsed() ? link.label : null"
+        >
+          <span class="nav-icon" [innerHTML]="getIconSvg(link.icon)"></span>
+          @if (!isCollapsed()) {
+            <span class="nav-label">{{ link.label }}</span>
+          }
+        </a>
+      }
+    </div>
+  </nav>
+
+  <!-- Footer -->
+  @if (!isCollapsed()) {
+    <div class="sidebar-footer">
+      <span class="version">v1.0.0</span>
+    </div>
+  }
+</aside>

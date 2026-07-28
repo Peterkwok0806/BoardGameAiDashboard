@@ -1,0 +1,17 @@
+@if (fullScreen()) {
+  <div class="spinner-fullscreen">
+    <div class="spinner-container">
+      <div class="spinner" [style.--spinner-color]="color()"></div>
+      @if (message()) {
+        <p class="spinner-message">{{ message() }}</p>
+      }
+    </div>
+  </div>
+} @else {
+  <div class="spinner-inline" [class]="'size-' + size()">
+    <div class="spinner" [style.--spinner-color]="color()"></div>
+    @if (message()) {
+      <p class="spinner-message">{{ message() }}</p>
+    }
+  </div>
+}

@@ -1,0 +1,134 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 240px;
+  height: calc(100vh - 64px);
+  background: #1e293b;
+  color: #e2e8f0;
+  transition: width 0.3s ease;
+  position: sticky;
+  top: 64px;
+}
+
+.sidebar.collapsed {
+  width: 72px;
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 6px;
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: background 0.2s;
+  align-self: flex-end;
+}
+
+.toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.collapsed .toggle-btn {
+  align-self: center;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 0 0.75rem;
+  overflow-y: auto;
+}
+
+.nav-section {
+  margin-bottom: 1.5rem;
+}
+
+.nav-section-title {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #cbd5e1;
+  transition: all 0.2s;
+  margin-bottom: 0.25rem;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.nav-item.active {
+  background: rgba(99, 102, 241, 0.3);
+  color: white;
+}
+
+.nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.nav-icon :global(svg) {
+  width: 20px;
+  height: 20px;
+}
+
+.nav-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.collapsed .nav-item {
+  justify-content: center;
+  padding: 0.75rem;
+}
+
+.sidebar-footer {
+  padding: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.version {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar:not(.collapsed) {
+    transform: translateX(0);
+  }
+}
