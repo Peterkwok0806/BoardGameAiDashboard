@@ -134,22 +134,31 @@ frontend/.env.*.local
 ## ---------------------------------------------------------------
 ## Secrets & Local Configuration
 ## ---------------------------------------------------------------
-# appsettings with secrets (keep appsettings.json and appsettings.Production.json)
+# ⚠️ appsettings.json contains secrets — DO NOT commit with real values
+# Keep ONLY appsettings.Production.json in repo (no secrets)
+appsettings.json
 appsettings.Development.json
 appsettings.Local.json
 appsettings.*.Local.json
 appsettings.*.Development.json
 
-# Environment files
+# Environment files — NEVER commit
 .env
 .env.local
 .env.*.local
 .env.development
 .env.production
+.env.test
 
 # User Secrets
 secrets.json
 Properties/serviceDependencies.json
+Properties/serviceDependencies.local.json
+
+# Angular environment files (use environment.prod.ts template)
+DashboardFrontend/src/environments/environment.ts
+DashboardFrontend/src/environments/environment.development.ts
+!DashboardFrontend/src/environments/environment.prod.ts
 
 ## ---------------------------------------------------------------
 ## Entity Framework Core
@@ -204,6 +213,13 @@ nlog-*.txt
 
 # Seq data
 seq-data/
+
+## ---------------------------------------------------------------
+## IDE / Editor Temp Files
+## ---------------------------------------------------------------
+*.sublime-workspace
+*.sublime-project
+.vscode/
 
 ## ---------------------------------------------------------------
 ## OS Files
