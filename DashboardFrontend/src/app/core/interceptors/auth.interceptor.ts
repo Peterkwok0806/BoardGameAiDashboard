@@ -1,9 +1,18 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { switchMap, catchError, throwError } from 'rxjs';
+import { switchMap, catchError, throwError, Subject } from 'rxjs';
 import { AuthService } from '../services/auth.service';
+import { TokenPairResponse } from '../models/auth.model';
 
-/** Flag to prevent concurrent token refresh requests. */
+/**
+ * Subject to track token refresh and share the result across concurrent 401 requests.
+ * Uses a Subject that emits the new token when refresh completes.
+ */
+const refreshSubject = new Subject<string>();
+
+/**
+ * Track if refresh is currently in progress.
+ */
 let isRefreshing = false;
 
 /**
@@ -31,21 +40,36 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
 
-      // ── Skip refresh if we're already refreshing or no refresh token
+      // ── Skip refresh if no refresh token ─────────────────────────
       const refreshToken = authService.getRefreshToken();
-      if (isRefreshing || !refreshToken) {
+      if (!refreshToken) {
         authService.logout();
         return throwError(() => error);
       }
 
-      // ── Attempt token refresh ────────────────────────────────────
+      // ── If refresh is in progress, wait for the result ────────────
+      if (isRefreshing) {
+        return refreshSubject.pipe(
+          switchMap((newToken: string) => {
+            const retriedReq = req.clone({
+              setHeaders: { Authorization: `Bearer ${newToken}` },
+            });
+            return next(retriedReq);
+          }),
+          catchError((err: unknown) => {
+            return throwError(() => err);
+          })
+        );
+      }
+
+      // ── Start new token refresh ──────────────────────────────────
       isRefreshing = true;
 
       return authService.refreshToken(refreshToken).pipe(
-        switchMap((tokenPair) => {
+        switchMap((tokenPair: TokenPairResponse) => {
           isRefreshing = false;
+          refreshSubject.next(tokenPair.accessToken);
 
-          // Retry original request with new token
           const retriedReq = req.clone({
             setHeaders: { Authorization: `Bearer ${tokenPair.accessToken}` },
           });
@@ -55,7 +79,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           isRefreshing = false;
           authService.logout();
           return throwError(() => refreshError);
-        }),
+        })
       );
     }),
   );

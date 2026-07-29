@@ -101,4 +101,17 @@ export class AuthService {
   private loadTokenFromStorage(): string | null {
     return localStorage.getItem(TOKEN_KEY);
   }
+
+  constructor() {
+    // Listen for storage changes from other tabs
+    window.addEventListener('storage', (event: StorageEvent) => {
+      if (event.key === TOKEN_KEY) {
+        this.token.set(event.newValue);
+      } else if (event.key === REFRESH_TOKEN_KEY && event.newValue === null) {
+        // Refresh token was removed (e.g., logout from another tab)
+        this.token.set(null);
+        this.currentUser.set(null);
+      }
+    });
+  }
 }

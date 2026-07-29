@@ -1,5 +1,6 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { GameService } from '../../../core/services/game.service';
 import { MatchService } from '../../../core/services/match.service';
 import { PredictionService } from '../../../core/services/prediction.service';
@@ -180,17 +181,15 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    import('rxjs').then(({ forkJoin }) => {
-      forkJoin(matchObservables).subscribe({
-        next: (matchArrays) => {
-          const allMatches = matchArrays.flat();
-          this._matches.set(allMatches);
-          this.loadWinRates(games);
-        },
-        error: () => {
-          this.loadWinRates(games);
-        }
-      });
+    forkJoin(matchObservables).subscribe({
+      next: (matchArrays) => {
+        const allMatches = matchArrays.flat();
+        this._matches.set(allMatches);
+        this.loadWinRates(games);
+      },
+      error: () => {
+        this.loadWinRates(games);
+      }
     });
   }
 
@@ -207,20 +206,18 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    import('rxjs').then(({ forkJoin }) => {
-      forkJoin(winRateObservables).subscribe({
-        next: (winRates) => {
-          const map = new Map<string, WinRate>();
-          games.slice(0, this.CHART_ITEMS_LIMIT).forEach((game, index) => {
-            map.set(game.id, winRates[index]);
-          });
-          this._winRates.set(map);
-          this._isLoading.set(false);
-        },
-        error: () => {
-          this._isLoading.set(false);
-        }
-      });
+    forkJoin(winRateObservables).subscribe({
+      next: (winRates) => {
+        const map = new Map<string, WinRate>();
+        games.slice(0, this.CHART_ITEMS_LIMIT).forEach((game, index) => {
+          map.set(game.id, winRates[index]);
+        });
+        this._winRates.set(map);
+        this._isLoading.set(false);
+      },
+      error: () => {
+        this._isLoading.set(false);
+      }
     });
   }
 }
