@@ -61,21 +61,42 @@ readonly userDisplay = computed(() => {
 });
 ```
 
-### 3. HttpClient 使用（阻斷）
-```typescript
-// ❌ 禁止 — 直接 fetch
-const res = await fetch('/api/data');
-const data = await res.json();
-if (!res.ok) throw new Error(data.message);
+### 3. HttpClient + RxJS 轉換（阻斷）
 
-// ✅ 正確 — 使用 HttpClient
-return this.http.get<Item[]>('/api/data').pipe(
-  tap(items => this.items.set(items)),
-  catchError(err => {
-    this.error.set(err.message);
-    return throwError(() => err);
-  })
-);
+```typescript
+// ❌ 避免 — .toPromise() 已廢棄
+async getGames(): Promise<Game[]> {
+  return this.http.get<Game[]>('/api/games').toPromise();
+}
+
+// ✅ 正確 — firstValueFrom()（取第一個值後完成）
+import { firstValueFrom } from 'rxjs';
+
+async getGames(): Promise<Game[]> {
+  return firstValueFrom(this.http.get<Game[]>('/api/games'));
+}
+
+// ✅ 正確 — async/await 模式
+async createGame(data: CreateGameDto): Promise<Game> {
+  return firstValueFrom(this.http.post<Game>('/api/games', data));
+}
+
+// ✅ 正確 — toSignal()（Angular 17+，Observable → Signal）
+import { toSignal } from '@angular/core/rxjs-interop';
+
+export class GameService {
+  private http = inject(HttpClient);
+  
+  readonly games = toSignal(
+    this.http.get<Game[]>('/api/games'),
+    { initialValue: [] as Game[] }
+  );
+  
+  readonly isLoading = toSignal(
+    this.http.get<boolean>('/api/loading'),
+    { initialValue: false }
+  );
+}
 ```
 
 ### 4. API 錯誤處理
