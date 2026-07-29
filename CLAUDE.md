@@ -6,6 +6,26 @@
 
 BoardGame AI Dashboard — 一個基於 RAG 的桌上型遊戲分析平台，具備 AI 聊天、勝率預測和對戰紀錄追蹤。技術棧：.NET 8 + Angular 19 + SQL Server + Qdrant + Redis + Semantic Kernel。
 
+## 常用 Skills（依需求自動使用）
+
+依據任務類型，主動使用 `/skill-name` 載入對應技能：
+
+| 指令 | 適用場景 |
+|------|----------|
+| `/efcore-migration` | 資料庫遷移、軟刪除、查詢過濾器 |
+| `/rag-pipeline` | PDF 處理、向量搜尋、RAG 開發 |
+| `/angular-signals` | Angular 19 Signals、Standalone Components |
+| `/jwt-auth` | JWT 認證、Refresh Token、授權 |
+
+### Code Review Sub-Agents
+
+| 指令 | 審查範圍 |
+|------|----------|
+| `/angular` | Angular/TypeScript 前端程式碼審查 |
+| `/dotnet` | C# 後端、Clean Architecture 審查 |
+
+---
+
 ## 常用指令
 
 ```bash
