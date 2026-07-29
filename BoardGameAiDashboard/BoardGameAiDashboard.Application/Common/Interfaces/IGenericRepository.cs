@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using BoardGameAiDashboard.Domain.Common;
 
 namespace BoardGameAiDashboard.Application.Common.Interfaces;
 
@@ -6,8 +7,8 @@ namespace BoardGameAiDashboard.Application.Common.Interfaces;
 /// Generic repository abstraction for CRUD operations.
 /// Implementations live in the Infrastructure layer (EF Core).
 /// </summary>
-/// <typeparam name="T">The entity type (must be a reference type).</typeparam>
-public interface IGenericRepository<T> where T : class
+/// <typeparam name="T">The entity type (must derive from BaseEntity).</typeparam>
+public interface IGenericRepository<T> where T : BaseEntity
 {
     /// <summary>Get an entity by its primary key (Guid Id).</summary>
     Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);

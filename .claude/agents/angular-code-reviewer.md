@@ -26,21 +26,11 @@ export class MyModule {}
 })
 export class MyComponent { }
 
-// ✅ 正確 — Standalone Component（Angular 17+）
-// app.config.ts 中提供 HttpClient
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideHttpClient(),
-    provideRouter(routes),
-    provideAnimations()
-  ]
-};
-
-// Component 中只需 import 需要的模組
+// ✅ 正確 — Standalone Component
 @Component({
   selector: 'app-my',
   standalone: true,
-  imports: [RouterOutlet, CommonModule]  // 不再需要 HttpClientModule
+  imports: [RouterOutlet, CommonModule, HttpClientModule]
 })
 export class MyComponent { }
 ```
@@ -96,28 +86,22 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
 export class GameService {
   private http = inject(HttpClient);
-
-  // 初始值模式
-  readonly games = toSignal(this.http.get<Game[]>('/api/games'), {
-    initialValue: [] as Game[]
-  });
-
-  // 無初始值模式（需要 requireSync）
-  readonly user = toSignal(this.http.get<User>('/api/user'), {
-    requireSync: true  // 同步讀取，確保有值
-  });
-
-  // 錯誤處理
-  readonly data = toSignal(this.http.get<Data>('/api/data'), {
-    initialValue: null as Data | null,
-    rejectErrors: true  // 錯誤轉為 null
-  });
+  
+  readonly games = toSignal(
+    this.http.get<Game[]>('/api/games'),
+    { initialValue: [] as Game[] }
+  );
+  
+  readonly isLoading = toSignal(
+    this.http.get<boolean>('/api/loading'),
+    { initialValue: false }
+  );
 }
 ```
 
-### 4. API Interceptors（Angular 17+ 函數式）
+### 4. API 錯誤處理
 ```typescript
-// ❌ 避免 — 類別式 Interceptor（仍可用，但不推薦新代碼使用）
+// ✅ 正確 — Interceptor 自動處理 ApiResult 包裝
 @Injectable({ providedIn: 'root' })
 export class ApiResultInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<unknown>, next: HttpHandler) {
@@ -131,46 +115,23 @@ export class ApiResultInterceptor implements HttpInterceptor {
     );
   }
 }
-
-// ✅ 正確 — 函數式 Interceptor（Angular 17+）
-// interceptors/api-result.interceptor.ts
-export const apiResultInterceptor: HttpInterceptorFn = (req, next) => {
-  return next(req).pipe(
-    map(event => {
-      if (event instanceof HttpResponse && event.body?.success === false) {
-        throw new Error(event.body.message);
-      }
-      return event;
-    })
-  );
-};
-
-// app.config.ts
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideHttpClient(
-      withInterceptors([apiResultInterceptor, jwtInterceptor])
-    )
-  ]
-};
 ```
 
-### 5. JWT Token 處理（函數式攔截器）
+### 5. JWT Token 處理
 ```typescript
-// ✅ 正確 — 函數式 JWT Interceptor
-// interceptors/jwt.interceptor.ts
-export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
-  const authService = inject(AuthService);
-  const token = authService.token();
-
-  if (token) {
-    req = req.clone({
-      setHeaders: { Authorization: `Bearer ${token}` }
-    });
+// ✅ 正確 — Interceptor 附加 Bearer Token
+@Injectable({ providedIn: 'root' })
+export class JwtInterceptor implements HttpInterceptor {
+  intercept(req: HttpRequest<unknown>, next: HttpHandler) {
+    const token = this.authService.token();
+    if (token) {
+      req = req.clone({
+        setHeaders: { Authorization: `Bearer ${token}` }
+      });
+    }
+    return next.handle(req);
   }
-
-  return next(req);
-};
+}
 ```
 
 ### 6. TypeScript 嚴格模式
@@ -195,53 +156,43 @@ function processData(data: GameDto) {
 readonly items = signal<ReadonlyArray<Item>>(emptyArray);
 ```
 
-### 7. Component 設計（Angular 17+/19 推薦）
+### 7. Component 設計
 ```typescript
-// ✅ 正確 — Function-based input/output（Angular 17+）
+// ✅ 正確 — 清晰的輸入輸出
 @Component({ selector: 'app-game-card' })
 export class GameCardComponent {
-  // 輸入：function-based（推薦）
-  readonly game = input.required<Game>();
-  readonly variant = input<'compact' | 'full'>('compact');
+  // 輸入：資料驅動
+  @Input({ required: true }) game!: Game;
+  @Input() variant: 'compact' | 'full' = 'compact';
 
-  // 輸出：function-based
+  // 輸出：事件通知
   readonly selected = output<Game>();
-
+  
   onClick(): void {
-    this.selected.emit(this.game());
+    this.selected.emit(this.game);
   }
 }
 
-// ✅ 正確 — 運算訊號
-readonly itemCount = computed(() => this.items().length);
-readonly isEmpty = computed(() => this.items().length === 0);
-
-// ❌ 避免 — 裝飾器模式（仍可用，但 function-based 更簡潔）
-@Input({ required: true }) game!: Game;
-readonly selected = new EventEmitter<Game>();
+// ❌ 避免 — 過度使用 @ViewChild
+// 優先使用 @Input 注入依賴
 ```
 
 ### 8. 依賴注入
 ```typescript
-// ✅ 正確 — 使用 inject() 函數（Angular 14+，簡潔）
+// ✅ 正確 — 使用 inject() 函數（Angular 14+）
 @Component({...})
 export class GameListComponent {
   private gameService = inject(GameService);
   private router = inject(Router);
-
+  
   readonly games = this.gameService.games;
 }
 
-// ✅ 正確 — 構造函數注入（有利於測試時 mock）
-@Component({...})
-export class GameListComponent {
-  constructor(
-    private gameService: GameService,
-    private router: Router
-  ) { }
-}
-
-// ❌ 避免 — 混用 inject() 和構造函數參數
+// ❌ 避免 — 構造函數注入（除非需要多個注入）
+constructor(
+  private gameService: GameService,
+  private router: Router
+) { }
 ```
 
 ### 9. Reactive Forms vs Template-driven

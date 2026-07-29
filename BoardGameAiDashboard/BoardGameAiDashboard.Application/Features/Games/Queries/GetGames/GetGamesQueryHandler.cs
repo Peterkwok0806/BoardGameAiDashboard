@@ -25,7 +25,7 @@ internal sealed class GetGamesQueryHandler
         System.Linq.Expressions.Expression<Func<Domain.Entities.Game, bool>>? filter =
             string.IsNullOrWhiteSpace(request.SearchTerm)
                 ? null
-                : g => g.Name.Contains(request.SearchTerm);
+                : g => g.Name.ToLower().Contains(request.SearchTerm.ToLower());
 
         var (items, totalCount) = await _unitOfWork.Games.GetPagedAsync(
             request.PageNumber,

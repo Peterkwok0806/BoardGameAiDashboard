@@ -91,6 +91,7 @@ public static class DependencyInjection
 
         // ── Auth Services (Password Hashing + JWT) ──────────────────────
         services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
+        services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
         services.AddScoped<IJwtTokenService, JwtTokenService>();
 
         // ── Ollama Settings ───────────────────────────────────────────────

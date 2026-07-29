@@ -1,5 +1,6 @@
 using BoardGameAiDashboard.Application.Features.Chat;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BoardGameAiDashboard.Api.Controllers;
@@ -7,6 +8,7 @@ namespace BoardGameAiDashboard.Api.Controllers;
 /// <summary>
 /// AI Chat endpoints — multi-turn RAG with query rewriting and conversation history.
 /// </summary>
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public sealed class ChatController : ControllerBase

@@ -38,6 +38,7 @@ public class RefreshToken : BaseEntity
 
     /// <summary>
     /// Check whether this token is still valid (not revoked and not expired).
+    /// Note: For accurate DB-level checks, use RefreshTokenQueryValidator with explicit DB query.
     /// </summary>
     public bool IsActive => !IsRevoked && ExpiresAt > DateTime.UtcNow;
 

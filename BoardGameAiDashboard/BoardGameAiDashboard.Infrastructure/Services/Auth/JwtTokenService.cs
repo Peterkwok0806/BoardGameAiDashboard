@@ -6,8 +6,9 @@ using BoardGameAiDashboard.Application.Common.Exceptions;
 using BoardGameAiDashboard.Application.Common.Interfaces;
 using BoardGameAiDashboard.Application.Features.Auth;
 using BoardGameAiDashboard.Domain.Entities;
+using BoardGameAiDashboard.Infrastructure.Settings;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace BoardGameAiDashboard.Infrastructure.Services.Auth;
@@ -20,30 +21,28 @@ namespace BoardGameAiDashboard.Infrastructure.Services.Auth;
 public sealed class JwtTokenService : IJwtTokenService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IConfiguration _configuration;
+    private readonly JwtSettings _settings;
 
-    public JwtTokenService(IUnitOfWork unitOfWork, IConfiguration configuration)
+    public JwtTokenService(IUnitOfWork unitOfWork, IOptions<JwtSettings> settings)
     {
         _unitOfWork = unitOfWork;
-        _configuration = configuration;
+        _settings = settings.Value;
     }
 
     public async Task<TokenPairResponse> GenerateTokenPairAsync(
         Guid userId, string email, string ipAddress, CancellationToken cancellationToken = default)
     {
-        var expiresAt = DateTime.UtcNow.AddMinutes(
-            double.Parse(_configuration["Jwt:TokenTTLInMinutes"] ?? "60"));
+        var expiresAt = DateTime.UtcNow.AddMinutes(_settings.TokenTTLInMinutes);
 
         // Generate access token
         var accessToken = GenerateAccessToken(userId, email, expiresAt);
 
         // Generate refresh token
         var refreshTokenValue = GenerateRefreshTokenValue();
-        var refreshTTL = int.Parse(_configuration["Jwt:RefreshTokenTTLInHours"] ?? "168"); // default 7 days
         var refreshToken = new RefreshToken(
             refreshTokenValue,
             userId,
-            DateTime.UtcNow.AddHours(refreshTTL),
+            DateTime.UtcNow.AddHours(_settings.RefreshTokenTTLInHours),
             ipAddress);
 
         await _unitOfWork.RefreshTokens.AddAsync(refreshToken, cancellationToken);
@@ -63,7 +62,7 @@ public sealed class JwtTokenService : IJwtTokenService
         var refreshToken = await _unitOfWork.RefreshTokens.Query()
             .FirstOrDefaultAsync(rt => rt.Token == refreshTokenValue && !rt.IsRevoked, cancellationToken);
 
-        if (refreshToken is null || !refreshToken.IsActive)
+        if (refreshToken is null || refreshToken.ExpiresAt <= DateTime.UtcNow)
         {
             throw new UnauthorizedException("Invalid or expired refresh token.");
         }
@@ -78,17 +77,15 @@ public sealed class JwtTokenService : IJwtTokenService
             throw new UnauthorizedException("User not found.");
         }
 
-        var newExpiresAt = DateTime.UtcNow.AddMinutes(
-            double.Parse(_configuration["Jwt:TokenTTLInMinutes"] ?? "60"));
+        var newExpiresAt = DateTime.UtcNow.AddMinutes(_settings.TokenTTLInMinutes);
 
         var newAccessToken = GenerateAccessToken(user.Id, user.Email, newExpiresAt);
 
         var newRefreshTokenValue = GenerateRefreshTokenValue();
-        var refreshTTL = int.Parse(_configuration["Jwt:RefreshTokenTTLInHours"] ?? "168");
         var newRefreshToken = new RefreshToken(
             newRefreshTokenValue,
             refreshToken.UserId,
-            DateTime.UtcNow.AddHours(refreshTTL),
+            DateTime.UtcNow.AddHours(_settings.RefreshTokenTTLInHours),
             ipAddress);
 
         await _unitOfWork.RefreshTokens.AddAsync(newRefreshToken, cancellationToken);
@@ -121,11 +118,7 @@ public sealed class JwtTokenService : IJwtTokenService
     /// </summary>
     private string GenerateAccessToken(Guid userId, string email, DateTime expiresAt)
     {
-        var secret = _configuration["Jwt:Secret"]!;
-        var issuer = _configuration["Jwt:Issuer"]!;
-        var audience = _configuration["Jwt:Audience"]!;
-
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.Secret));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var claims = new[]
@@ -139,8 +132,8 @@ public sealed class JwtTokenService : IJwtTokenService
         };
 
         var token = new JwtSecurityToken(
-            issuer: issuer,
-            audience: audience,
+            issuer: _settings.Issuer,
+            audience: _settings.Audience,
             claims: claims,
             expires: expiresAt,
             signingCredentials: credentials);

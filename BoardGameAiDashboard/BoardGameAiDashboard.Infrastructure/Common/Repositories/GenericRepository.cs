@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using BoardGameAiDashboard.Application.Common.Interfaces;
+using BoardGameAiDashboard.Domain.Common;
 using BoardGameAiDashboard.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,9 +10,11 @@ namespace BoardGameAiDashboard.Infrastructure.Common.Repositories;
 /// Generic repository implementation using EF Core.
 /// Soft-delete is handled automatically by EF Core HasQueryFilter on the DbContext.
 /// </summary>
-/// <typeparam name="T">The entity type (must be a reference type).</typeparam>
-public class GenericRepository<T> : IGenericRepository<T> where T : class
+/// <typeparam name="T">The entity type (must derive from BaseEntity).</typeparam>
+public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
 {
+    private static readonly Func<T, Guid> _getId = e => e.Id;
+
     protected readonly ApplicationDbContext _context;
 
     public GenericRepository(ApplicationDbContext context)
@@ -24,7 +27,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         return await _context.Set<T>()
             .AsNoTracking()
-            .FirstOrDefaultAsync(e => EF.Property<Guid>(e, "Id") == id, cancellationToken);
+            .FirstOrDefaultAsync(e => _getId(e) == id, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -71,13 +74,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         _context.Set<T>().Attach(entity);
         _context.Entry(entity).State = EntityState.Modified;
-
-        // Attempt to call MarkUpdated() on BaseEntity-derived entities via reflection-free approach.
-        // Since T is constrained to 'class' (not BaseEntity), we use the generic pattern.
-        if (entity is Domain.Common.BaseEntity baseEntity)
-        {
-            baseEntity.MarkUpdated();
-        }
+        entity.MarkUpdated();
 
         return Task.CompletedTask;
     }
@@ -86,15 +83,11 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var entity = await _context.Set<T>()
-            .FirstOrDefaultAsync(e => EF.Property<Guid>(e, "Id") == id, cancellationToken);
+            .FirstOrDefaultAsync(e => _getId(e) == id, cancellationToken);
 
         if (entity is not null)
         {
-            // Soft-delete: set IsDeleted = true and update UpdatedAt
-            if (entity is Domain.Common.BaseEntity baseEntity)
-            {
-                baseEntity.SoftDelete();
-            }
+            entity.SoftDelete();
 
             _context.Set<T>().Attach(entity);
             _context.Entry(entity).State = EntityState.Modified;

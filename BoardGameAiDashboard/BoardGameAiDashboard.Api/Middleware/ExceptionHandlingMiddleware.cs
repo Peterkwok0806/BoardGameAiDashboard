@@ -47,6 +47,12 @@ public sealed class ExceptionHandlingMiddleware
 
     private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
+        // Prevent writing to a response that has already started
+        if (context.Response.HasStarted)
+        {
+            return;
+        }
+
         var (statusCode, title, detail) = exception switch
         {
             // ── Domain / Application Exceptions ──────────────────────

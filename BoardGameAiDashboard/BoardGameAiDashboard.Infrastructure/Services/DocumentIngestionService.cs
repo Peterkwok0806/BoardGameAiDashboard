@@ -82,6 +82,25 @@ public sealed class DocumentIngestionService : IDocumentIngestionService
         }
     }
 
+    /// <inheritdoc />
+    public async Task<int> IngestGameRulesAsync(
+        Guid gameId,
+        string pdfFilePath,
+        IReadOnlyList<string>? sectionTitles = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (!File.Exists(pdfFilePath))
+        {
+            _logger.LogWarning(
+                "PDF file not found: {FilePath} for GameId={GameId}",
+                pdfFilePath, gameId);
+            return 0;
+        }
+
+        await using var stream = File.OpenRead(pdfFilePath);
+        return await IngestGameRulesAsync(gameId, stream, sectionTitles, cancellationToken);
+    }
+
     /// <summary>
     /// Shared ingestion pipeline: segment → chunk → embed → store.
     /// Any failure during chunk processing will throw immediately —
