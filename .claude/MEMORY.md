@@ -7,4 +7,5 @@
 
 ## Sub-Agents
 
-- [Code Reviewer](agents/code-reviewer.md) — 程式碼審查，檢查 Clean Architecture 合規性
+- [Angular Code Reviewer](agents/angular-code-reviewer.md) — Angular/TypeScript 前端審查
+- [.NET Code Reviewer](agents/dotnet-code-reviewer.md) — C# 後端、Clean Architecture 審查
