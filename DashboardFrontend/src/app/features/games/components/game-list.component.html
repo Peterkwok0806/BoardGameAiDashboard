@@ -1,0 +1,286 @@
+<div class="game-management">
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Game Management</h1>
+      <p class="subtitle">Manage your board games collection</p>
+    </div>
+    <button type="button" class="btn btn-primary" (click)="openCreateForm()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      Add Game
+    </button>
+  </header>
+
+  <!-- Error Banner -->
+  @if (error()) {
+    <app-error-alert
+      type="error"
+      [message]="error()!"
+      (dismissed)="dismissError()"
+    />
+  }
+
+  <!-- Search Bar -->
+  <div class="search-section">
+    <form class="search-form" (ngSubmit)="onSearch()">
+      <div class="search-input-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search games..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+          name="searchTerm"
+        />
+        @if (searchTerm()) {
+          <button type="button" class="clear-btn" (click)="clearSearch()" aria-label="Clear search">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        }
+      </div>
+      <button type="submit" class="btn btn-secondary">Search</button>
+    </form>
+    <span class="result-count">{{ totalCount() }} games found</span>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <app-loading-spinner message="Loading games..." />
+    </div>
+  } @else {
+    <!-- Games Table -->
+    <div class="card">
+      @if (games().length > 0) {
+        <div class="table-responsive">
+          <table class="games-table" aria-label="Games list">
+            <caption class="sr-only">Board games collection</caption>
+            <thead>
+              <tr>
+                <th scope="col">Game</th>
+                <th scope="col">Description</th>
+                <th scope="col">Players</th>
+                <th scope="col">Created</th>
+                <th scope="col" class="actions-col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (game of games(); track game.id) {
+                <tr>
+                  <td>
+                    <div class="game-name-cell">
+                      <span class="game-name">{{ game.name }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="game-description">
+                      {{ game.description || 'No description' }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="players-badge">
+                      {{ game.minPlayers }}-{{ game.maxPlayers }} players
+                    </span>
+                  </td>
+                  <td>
+                    <span class="date-cell">{{ formatDate(game.createdAt) }}</span>
+                  </td>
+                  <td class="actions-cell">
+                    <div class="action-buttons">
+                      <button
+                        type="button"
+                        class="btn btn-icon btn-edit"
+                        (click)="openEditForm(game)"
+                        aria-label="Edit game"
+                        title="Edit"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-icon btn-delete"
+                        (click)="confirmDelete(game)"
+                        aria-label="Delete game"
+                        title="Delete"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="3 6 5 6 21 6"></polyline>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                          <line x1="10" y1="11" x2="10" y2="17"></line>
+                          <line x1="14" y1="11" x2="14" y2="17"></line>
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (totalPages() > 1) {
+          <div class="pagination">
+            <button
+              type="button"
+              class="btn btn-pagination"
+              [disabled]="!hasPrevPage()"
+              (click)="prevPage()"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+              Previous
+            </button>
+
+            <div class="page-numbers">
+              @for (page of pageNumbers(); track page) {
+                <button
+                  type="button"
+                  class="btn btn-page"
+                  [class.active]="page === currentPage()"
+                  (click)="goToPage(page)"
+                >
+                  {{ page }}
+                </button>
+              }
+            </div>
+
+            <button
+              type="button"
+              class="btn btn-pagination"
+              [disabled]="!hasNextPage()"
+              (click)="nextPage()"
+            >
+              Next
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          </div>
+        }
+      } @else {
+        <div class="empty-state">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          @if (searchTerm()) {
+            <p>No games found matching "{{ searchTerm() }}"</p>
+            <button type="button" class="btn btn-secondary" (click)="clearSearch()">Clear Search</button>
+          } @else {
+            <p>No games yet. Add your first game to get started!</p>
+            <button type="button" class="btn btn-primary" (click)="openCreateForm()">Add Game</button>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Create/Edit Modal -->
+@if (showForm()) {
+  <div class="modal-overlay" (click)="closeForm()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ isEditing() ? 'Edit Game' : 'Add New Game' }}</h2>
+        <button type="button" class="btn btn-icon btn-close" (click)="closeForm()" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form class="modal-body" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="gameName">Game Name *</label>
+          <input
+            type="text"
+            id="gameName"
+            class="form-control"
+            [(ngModel)]="formData.name"
+            name="name"
+            placeholder="Enter game name"
+            required
+            maxlength="100"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="gameDescription">Description</label>
+          <textarea
+            id="gameDescription"
+            class="form-control"
+            [(ngModel)]="formData.description"
+            name="description"
+            placeholder="Enter game description"
+            rows="3"
+            maxlength="500"
+          ></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="minPlayers">Min Players *</label>
+            <input
+              type="number"
+              id="minPlayers"
+              class="form-control"
+              [(ngModel)]="formData.minPlayers"
+              name="minPlayers"
+              min="1"
+              max="99"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="maxPlayers">Max Players *</label>
+            <input
+              type="number"
+              id="maxPlayers"
+              class="form-control"
+              [(ngModel)]="formData.maxPlayers"
+              name="maxPlayers"
+              min="1"
+              max="99"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancel</button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="isSubmitting()"
+          >
+            @if (isSubmitting()) {
+              <span class="spinner"></span>
+              Saving...
+            } @else {
+              {{ isEditing() ? 'Update' : 'Create' }}
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

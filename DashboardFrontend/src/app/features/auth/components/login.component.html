@@ -30,6 +30,7 @@
             id="email"
             [ngModel]="email()"
             (ngModelChange)="setEmail($event)"
+            [ngModelOptions]="{standalone: true}"
             placeholder="you@example.com"
             autocomplete="email"
             required
@@ -43,6 +44,7 @@
             id="password"
             [ngModel]="password()"
             (ngModelChange)="setPassword($event)"
+            [ngModelOptions]="{standalone: true}"
             placeholder="Enter your password"
             autocomplete="current-password"
             required
@@ -86,6 +88,7 @@
             id="displayName"
             [ngModel]="displayName()"
             (ngModelChange)="setDisplayName($event)"
+            [ngModelOptions]="{standalone: true}"
             placeholder="Your name"
             autocomplete="name"
             required
@@ -99,6 +102,7 @@
             id="reg-email"
             [ngModel]="email()"
             (ngModelChange)="setEmail($event)"
+            [ngModelOptions]="{standalone: true}"
             placeholder="you@example.com"
             autocomplete="email"
             required
@@ -112,6 +116,7 @@
             id="reg-password"
             [ngModel]="password()"
             (ngModelChange)="setPassword($event)"
+            [ngModelOptions]="{standalone: true}"
             placeholder="At least 6 characters"
             autocomplete="new-password"
             required
@@ -125,6 +130,7 @@
             id="confirm-password"
             [ngModel]="confirmPassword()"
             (ngModelChange)="setConfirmPassword($event)"
+            [ngModelOptions]="{standalone: true}"
             placeholder="Re-enter password"
             autocomplete="new-password"
             required

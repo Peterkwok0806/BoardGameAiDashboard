@@ -1,6 +1,6 @@
 import { Component, inject, computed } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 /**
  * NavbarComponent — Top navigation bar with branding and user menu.

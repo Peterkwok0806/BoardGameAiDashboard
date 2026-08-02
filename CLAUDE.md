@@ -23,6 +23,25 @@ BoardGame AI Dashboard — 一個基於 RAG 的桌上型遊戲分析平台，具
 |------|----------|
 | `/angular` | Angular/TypeScript 前端程式碼審查 |
 | `/dotnet` | C# 後端、Clean Architecture 審查 |
+| `/security` | 安全審查（認證、授權、輸入驗證） |
+| `/architecture` | Clean Architecture 約束檢查 |
+
+### Action Templates
+
+| 指令 | 用途 |
+|------|------|
+| `/new-feature` | 新增功能完整工作流程 |
+| `/bug-fix` | Bug 修復標準流程 |
+| `/refactor` | 重構工作流程 |
+
+### Knowledge Base
+
+| 路徑 | 內容 |
+|------|------|
+| `knowledge/coding-standards.md` | C# 和 TypeScript 命名規範 |
+| `knowledge/troubleshooting.md` | 常見問題排查指南 |
+| `knowledge/architecture-decisions/adr-001-semantic-kernel.md` | 為何使用 Semantic Kernel |
+| `knowledge/architecture-decisions/adr-002-soft-delete.md` | 全域軟刪除模式設計 |
 
 ---
 
@@ -155,6 +174,22 @@ Angular 19 具備：
 - ng2-charts (Chart.js)
 - SweetAlert2 確認對話框
 - HTTP interceptor 處理 JWT + `ApiResult<T>` 解包
+
+## Harness Engineering
+
+本專案已配置完善的 Claude Code Harness 以提升 AI 協作效率：
+
+### 設定檔位置
+
+- `.claude/settings.local.json` — 專案權限配置
+- `.claude/MEMORY.md` — 知識庫索引
+
+### 自動化腳本
+
+```bash
+# 驗證 C# 命名空間一致性
+node .claude/scripts/verify-namespace.js BoardGameAiDashboard.Domain/Entities
+```
 
 ## 重要約束
 

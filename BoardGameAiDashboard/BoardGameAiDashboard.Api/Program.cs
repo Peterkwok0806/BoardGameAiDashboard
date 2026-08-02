@@ -100,7 +100,11 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+// ── HTTPS Redirection (Production only — dev uses HTTP) ───────────────
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 // ── CORS ────────────────────────────────────────────────────────────
 app.UseCors("AllowAngular");
