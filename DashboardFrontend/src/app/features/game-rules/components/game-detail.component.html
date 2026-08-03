@@ -1,0 +1,207 @@
+<div class="game-detail-container">
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <app-loading-spinner message="Loading game..." />
+    </div>
+  } @else if (error() && !game()) {
+    <!-- Error State -->
+    <app-error-alert
+      type="error"
+      [message]="error()!"
+    />
+    <div class="back-link">
+      <a routerLink="/games" class="btn btn-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Back to Games
+      </a>
+    </div>
+  } @else {
+    @if (game(); as gameData) {
+    <!-- Game Header -->
+    <header class="page-header">
+      <div class="header-content">
+        <div class="header-nav">
+          <a routerLink="/games" class="back-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </a>
+          <h1>{{ gameData.name }}</h1>
+        </div>
+        <p class="subtitle">Game Details & Rule Upload</p>
+      </div>
+    </header>
+
+    <!-- Game Info Card -->
+    <section class="card game-info-card">
+      <div class="card-header">
+        <h2>Game Information</h2>
+      </div>
+      <div class="card-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Description</label>
+            <p>{{ gameData.description || 'No description' }}</p>
+          </div>
+          <div class="info-item">
+            <label>Players</label>
+            <span class="players-badge">
+              {{ gameData.minPlayers }}-{{ gameData.maxPlayers }} players
+            </span>
+          </div>
+          <div class="info-item">
+            <label>Created</label>
+            <p>{{ formatDate(gameData.createdAt) }}</p>
+          </div>
+          @if (gameData.updatedAt) {
+            <div class="info-item">
+              <label>Last Updated</label>
+              <p>{{ formatDate(gameData.updatedAt) }}</p>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- Upload Rules Card -->
+    <section class="card upload-rules-card">
+      <div class="card-header">
+        <h2>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="12" y1="18" x2="12" y2="12"></line>
+            <line x1="9" y1="15" x2="12" y2="12"></line>
+            <line x1="15" y1="15" x2="12" y2="12"></line>
+          </svg>
+          Upload Game Rules
+        </h2>
+      </div>
+      <div class="card-body">
+        <p class="upload-description">
+          Upload a PDF rulebook to enable AI-powered Q&A about this game's rules.
+          The PDF will be processed and stored in the RAG vector database.
+        </p>
+
+        <!-- File Input -->
+        <div class="file-input-container">
+          <input
+            type="file"
+            id="pdfFile"
+            accept=".pdf"
+            class="file-input"
+            (change)="onFileSelected($event)"
+          />
+          <label for="pdfFile" class="file-label">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <span>Choose PDF file</span>
+            <span class="file-hint">Maximum size: 120 MB</span>
+          </label>
+        </div>
+
+        <!-- Selected File -->
+        @if (hasSelectedFile(); as file) {
+          <div class="selected-file">
+            <div class="file-info">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              <div class="file-details">
+                <span class="file-name">{{ selectedFile()?.name }}</span>
+                <span class="file-size">{{ formatFileSize(selectedFile()!.size) }}</span>
+              </div>
+            </div>
+            <button type="button" class="btn btn-icon btn-clear" (click)="clearFile()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+        }
+
+        <!-- Section Titles (Optional) -->
+        <div class="form-group">
+          <label for="sectionTitles">
+            Section Titles
+            <span class="label-hint">(Optional)</span>
+          </label>
+          <input
+            type="text"
+            id="sectionTitles"
+            class="form-control"
+            [ngModel]="sectionTitles()"
+            (ngModelChange)="sectionTitles.set($event)"
+            placeholder="Overview, Setup, Gameplay, Victory Conditions, ..."
+          />
+          <span class="form-hint">
+            Comma-separated list of section titles to improve PDF segmentation.
+            Example: Overview, Setup, Components, Gameplay, Combat, Victory
+          </span>
+        </div>
+
+        <!-- Upload Progress -->
+        @if (gameRulesService.isUploading()) {
+          <div class="upload-progress">
+            <div class="progress-info">
+              <span class="progress-label">Uploading...</span>
+              <span class="progress-percentage">{{ gameRulesService.uploadProgress()?.percentage }}%</span>
+            </div>
+            <div class="progress-bar">
+              <div
+                class="progress-fill"
+                [style.width.%]="gameRulesService.uploadProgress()?.percentage"
+              ></div>
+            </div>
+            <span class="progress-detail">
+              {{ formatFileSize(gameRulesService.uploadProgress()?.loaded || 0) }} /
+              {{ formatFileSize(gameRulesService.uploadProgress()?.total || 0) }}
+            </span>
+          </div>
+        }
+
+        <!-- Error Message -->
+        @if (gameRulesService.uploadError()) {
+          <app-error-alert
+            type="error"
+            [message]="gameRulesService.uploadError()!"
+            (dismissed)="gameRulesService.resetUploadState()"
+          />
+        }
+
+        <!-- Upload Button -->
+        <div class="upload-actions">
+          <button
+            type="button"
+            class="btn btn-primary btn-upload"
+            [disabled]="!canUpload()"
+            (click)="uploadRules()"
+          >
+            @if (gameRulesService.isUploading()) {
+              <span class="spinner"></span>
+              Uploading...
+            } @else {
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="16 16 12 12 8 16"></polyline>
+                <line x1="12" y1="12" x2="12" y2="21"></line>
+                <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
+              </svg>
+              Upload Rules
+            }
+          </button>
+        </div>
+      </div>
+    </section>
+    }
+  }
+</div>

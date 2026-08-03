@@ -47,6 +47,14 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'games/:id',
+    loadComponent: () =>
+      import('./features/game-rules/components/game-detail.component').then(
+        (m) => m.GameDetailComponent
+      ),
+    canActivate: [authGuard],
+  },
+  {
     path: '**',
     redirectTo: 'login',
   },

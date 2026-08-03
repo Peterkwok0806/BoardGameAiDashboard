@@ -23,6 +23,33 @@
     />
   }
 
+  <!-- Upload Progress -->
+  @if (gameRulesService.isUploading()) {
+    <div class="upload-progress-container">
+      <div class="progress-header">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+        <span>Uploading rules PDF...</span>
+      </div>
+      <div class="progress-bar-wrapper">
+        <div class="progress-bar" [style.width.%]="gameRulesService.uploadProgress()?.percentage ?? 0"></div>
+      </div>
+      <span class="progress-text">{{ gameRulesService.uploadProgress()?.percentage ?? 0 }}%</span>
+    </div>
+  }
+
+  <!-- Upload Error -->
+  @if (gameRulesService.uploadError()) {
+    <app-error-alert
+      type="error"
+      [message]="gameRulesService.uploadError()!"
+      (dismissed)="gameRulesService.resetUploadState()"
+    />
+  }
+
   <!-- Search Bar -->
   <div class="search-section">
     <form class="search-form" (ngSubmit)="onSearch()">
@@ -97,6 +124,31 @@
                   </td>
                   <td class="actions-cell">
                     <div class="action-buttons">
+                      <button
+                        type="button"
+                        class="btn btn-icon btn-pdf"
+                        (click)="uploadPdf(game)"
+                        aria-label="Upload PDF rules"
+                        title="Upload Rules PDF"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                          <polyline points="14 2 14 8 20 8"></polyline>
+                          <line x1="12" y1="18" x2="12" y2="12"></line>
+                          <line x1="9" y1="15" x2="15" y2="15"></line>
+                        </svg>
+                      </button>
+                      <a
+                        [routerLink]="['/games', game.id]"
+                        class="btn btn-icon btn-view"
+                        aria-label="View game"
+                        title="View & Upload Rules"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                          <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                      </a>
                       <button
                         type="button"
                         class="btn btn-icon btn-edit"

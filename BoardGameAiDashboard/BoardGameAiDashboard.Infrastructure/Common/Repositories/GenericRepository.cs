@@ -13,8 +13,6 @@ namespace BoardGameAiDashboard.Infrastructure.Common.Repositories;
 /// <typeparam name="T">The entity type (must derive from BaseEntity).</typeparam>
 public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
 {
-    private static readonly Func<T, Guid> _getId = e => e.Id;
-
     protected readonly ApplicationDbContext _context;
 
     public GenericRepository(ApplicationDbContext context)
@@ -27,7 +25,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
     {
         return await _context.Set<T>()
             .AsNoTracking()
-            .FirstOrDefaultAsync(e => _getId(e) == id, cancellationToken);
+            .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -83,7 +81,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var entity = await _context.Set<T>()
-            .FirstOrDefaultAsync(e => _getId(e) == id, cancellationToken);
+            .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
 
         if (entity is not null)
         {

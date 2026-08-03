@@ -1,6 +1,8 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { GameService } from '../../../core/services/game.service';
+import { GameRulesService } from '../../game-rules/services/game-rules.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { ErrorAlertComponent } from '../../../shared/components/error-alert/error-alert.component';
 import type { Game, CreateGameRequest, UpdateGameRequest } from '../../../core/models/game.model';
@@ -20,7 +22,7 @@ import Swal from 'sweetalert2';
  */
 @Component({
   selector: 'app-game-list',
-  imports: [FormsModule, LoadingSpinnerComponent, ErrorAlertComponent],
+  imports: [RouterLink, FormsModule, LoadingSpinnerComponent, ErrorAlertComponent],
   templateUrl: './game-list.component.html',
   styleUrl: './game-list.component.css'
 })
@@ -30,6 +32,7 @@ export class GameListComponent implements OnInit {
 
   // ── Services ─────────────────────────────────────────────────────
   private readonly gameService = inject(GameService);
+  readonly gameRulesService = inject(GameRulesService);
 
   // ── State Signals ────────────────────────────────────────────────
   readonly games = signal<Game[]>([]);
@@ -210,6 +213,38 @@ export class GameListComponent implements OnInit {
         this.deleteGame(game);
       }
     });
+  }
+
+  /**
+   * Open file picker and upload PDF for game rules.
+   */
+  uploadPdf(game: Game): void {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.pdf';
+
+    input.onchange = (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      const file = target.files?.[0];
+      if (!file) return;
+
+      if (!file.name.toLowerCase().endsWith('.pdf')) {
+        Swal.fire('Error', 'Please select a PDF file', 'error');
+        return;
+      }
+
+      this.gameRulesService.uploadGameRules(game.id, file).subscribe({
+        next: () => {
+          Swal.fire('Success', `Rules PDF uploaded for "${game.name}"`, 'success');
+          this.gameRulesService.resetUploadState();
+        },
+        error: (err) => {
+          this.gameRulesService.setUploadError(err?.error?.detail || 'Failed to upload PDF');
+        }
+      });
+    };
+
+    input.click();
   }
 
   /**

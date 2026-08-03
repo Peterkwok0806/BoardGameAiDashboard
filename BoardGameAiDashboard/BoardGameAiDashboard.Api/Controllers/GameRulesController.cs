@@ -1,5 +1,6 @@
 using BoardGameAiDashboard.Application.Features.GameRules.Commands.IngestGameRules;
 using MediatR;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace BoardGameAiDashboard.Api.Controllers;
@@ -8,6 +9,7 @@ namespace BoardGameAiDashboard.Api.Controllers;
 /// Game rules management — PDF upload and RAG ingestion.
 /// </summary>
 [ApiController]
+
 [Route("api/[controller]")]
 public sealed class GameRulesController : ControllerBase
 {

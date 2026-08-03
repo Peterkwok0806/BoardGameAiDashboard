@@ -138,7 +138,22 @@ public sealed class RagService : IRagService
         var systemPrompt = @"You are an AI assistant specializing in board game rules and strategies.
 Answer the user's question based ONLY on the provided context.
 If the context doesn't contain enough information to answer, say so clearly.
-Always cite the relevant section(s) when referencing game rules.
+
+RESPONSE FORMAT (IMPORTANT):
+1. Answer the question using bullet points for clarity
+2. Put all sources/references at the END of your response under a 'Sources:' section
+3. Format sources as a simple numbered list
+4. Keep your answer concise but informative
+
+Example format:
+• First main point about the game rules
+• Second main point
+• Third point with important details
+
+Sources:
+1. Section Title 1
+2. Section Title 2
+
 Respond in the same language as the user's question (支持中文、粵語/廣東話、English).";
 
         // Assemble chat history

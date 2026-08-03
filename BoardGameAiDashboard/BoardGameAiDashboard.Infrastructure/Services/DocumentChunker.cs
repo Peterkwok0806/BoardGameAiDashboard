@@ -25,12 +25,17 @@ public sealed partial class DocumentChunker : IDocumentChunker
     /// <summary>Minimum chunk count in a section before adding subtitle.</summary>
     private const int MinChunksForSubtitle = 3;
 
+    /// <summary>Maximum length for section title (matches DB column size).</summary>
+    private const int MaxSectionTitleLength = 200;
+
     /// <summary>Regex to detect table rows (tab-separated or aligned columns).</summary>
     [GeneratedRegex(@"^.+\t.+$|^\s{2,}\S", RegexOptions.Multiline)]
     private static partial Regex TableRowPattern();
 
     /// <summary>Regex to detect subtitle/heading lines within content.</summary>
-    [GeneratedRegex(@"^(?:\[[^\]]+\]|(?:\*\*?[^*]+\*\*?)|(?:[A-Z][a-z]+(?:\s+[A-Za-z]+){0,3}:)|(?:(?:Step|Phase|Note|Warning|Tip)\s+\d+))", RegexOptions.Multiline)]
+    /// Only matches short, clear subtitle patterns (max ~60 chars) to avoid extracting long text.
+    /// Pattern: [short], **short**, *short*, Title: or Step/Phase/Note N
+    [GeneratedRegex(@"^(?:\[[^\]]{1,60}\]|(?:\*\*?[^*]{1,60}\*\*?)|(?:[A-Z][a-z]+(?:\s+[A-Za-z]+){0,3}:)|(?:(?:Step|Phase|Note|Warning|Tip)\s+\d+))", RegexOptions.Multiline)]
     private static partial Regex SubtitlePattern();
 
     /// <inheritdoc />
@@ -61,8 +66,12 @@ public sealed partial class DocumentChunker : IDocumentChunker
                 {
                     var chunk = sectionChunks[i];
                     var subtitle = i > 0 ? $" (Part {i + 1})" : "";
-                    allChunks.Add(new DocumentChunk(
-                        chunk.Content, chunk.SectionTitle + subtitle, chunk.GameId));
+                    // Truncate combined title to fit DB column (200 chars)
+                    var combinedTitle = chunk.SectionTitle + subtitle;
+                    var finalTitle = combinedTitle.Length > MaxSectionTitleLength
+                        ? combinedTitle[..MaxSectionTitleLength]
+                        : combinedTitle;
+                    allChunks.Add(new DocumentChunk(chunk.Content, finalTitle, chunk.GameId));
                 }
             }
             else
@@ -114,8 +123,11 @@ public sealed partial class DocumentChunker : IDocumentChunker
             var subtitle = TryExtractSubtitle(segment);
             if (subtitle != null)
             {
-                currentTitle = $"{sectionTitle} - {subtitle}";
-                // Don't start a new chunk for subtitle lines, just update title
+                // Truncate combined title to fit DB column (200 chars)
+                var combinedTitle = $"{sectionTitle} - {subtitle}";
+                currentTitle = combinedTitle.Length > MaxSectionTitleLength
+                    ? combinedTitle[..MaxSectionTitleLength]
+                    : combinedTitle;
             }
 
             if (wouldExceed && currentChunk.Length > 0)
@@ -227,7 +239,7 @@ public sealed partial class DocumentChunker : IDocumentChunker
 
     /// <summary>
     /// Attempts to extract a subtitle from a segment line.
-    /// Returns null if no subtitle detected.
+    /// Returns null if no subtitle detected or if extracted text is too long.
     /// </summary>
     private static string? TryExtractSubtitle(string segment)
     {
@@ -238,10 +250,14 @@ public sealed partial class DocumentChunker : IDocumentChunker
         // Check for subtitle pattern
         if (SubtitlePattern().IsMatch(firstLine))
         {
-            // Clean up common subtitle formats
-            return firstLine.TrimStart('[', '*', '-', '#')
-                           .TrimEnd(']', '*', '-', '#', ':')
-                           .Trim();
+            // Clean up common subtitle formats and limit length
+            var cleaned = firstLine.TrimStart('[', '*', '-', '#')
+                                   .TrimEnd(']', '*', '-', '#', ':')
+                                   .Trim();
+
+            // Only accept short subtitles (max 50 chars after cleaning)
+            if (cleaned.Length > 0 && cleaned.Length <= 50)
+                return cleaned;
         }
 
         return null;
