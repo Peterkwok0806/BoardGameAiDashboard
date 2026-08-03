@@ -255,6 +255,7 @@ public sealed class DocumentIngestionService : IDocumentIngestionService
 
     /// <summary>
     /// Split text by explicit section title markers.
+    /// Handles consecutive duplicate titles to avoid repeating section headers.
     /// </summary>
     private static IReadOnlyList<DocumentSection> SplitBySectionTitles(
         string text, IReadOnlyList<string> sectionTitles)
@@ -268,9 +269,19 @@ public sealed class DocumentIngestionService : IDocumentIngestionService
             sectionTitles.Select(t => t.Trim()),
             StringComparer.OrdinalIgnoreCase);
 
-        foreach (var line in lines)
+        var skipNextLine = false;
+
+        for (int i = 0; i < lines.Length; i++)
         {
+            var line = lines[i];
             var trimmedLine = line.Trim();
+
+            // Skip duplicate title lines (consecutive titles)
+            if (skipNextLine)
+            {
+                skipNextLine = false;
+                continue;
+            }
 
             // Check if this line matches any section title
             if (titleSet.Contains(trimmedLine))
@@ -284,6 +295,16 @@ public sealed class DocumentIngestionService : IDocumentIngestionService
 
                 currentTitle = trimmedLine;
                 currentContent.Clear();
+
+                // Check if next line is also a title (duplicate)
+                if (i + 1 < lines.Length)
+                {
+                    var nextTrimmed = lines[i + 1].Trim();
+                    if (titleSet.Contains(nextTrimmed))
+                    {
+                        skipNextLine = true; // Skip the duplicate title line
+                    }
+                }
             }
             else
             {

@@ -30,7 +30,7 @@ public sealed class GameRulesController : ControllerBase
     /// <param name="sectionTitles">Optional comma-separated section titles for segmentation.</param>
     /// <param name="ct">Cancellation token.</param>
     [HttpPost("{gameId:guid}/ingest")]
-    [RequestSizeLimit(50 * 1024 * 1024)] // 50 MB
+    [RequestSizeLimit(120 * 1024 * 1024)] // 120 MB
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> IngestGameRules(
