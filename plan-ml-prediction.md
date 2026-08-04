@@ -388,6 +388,9 @@ public class GameStateFeatureEngineering : IGameStateFeatureEngineering
 
 ```csharp
 // Infrastructure/Services/ML/WinRatePredictionService.cs
+using System.Collections.Concurrent;
+using Microsoft.ML;
+
 public interface IWinRatePredictionService
 {
     /// <summary>訓練並比較 FastForest 和 FastTree</summary>
@@ -418,9 +421,10 @@ public class WinRatePredictionService : IWinRatePredictionService
     private readonly string _modelDirectory;
     private readonly IGameStateFeatureEngineering _featureEngineering;
 
-    private readonly Dictionary<Guid, (ITransformer Model, string Name)> _models = new();
-    private readonly Dictionary<Guid, ModelComparisonResult> _comparisons = new();
-    private readonly Dictionary<Guid, float[]> _featureImportances = new();
+    // 使用 ConcurrentDictionary 確保執行緒安全
+    private readonly ConcurrentDictionary<Guid, (ITransformer Model, string Name)> _models = new();
+    private readonly ConcurrentDictionary<Guid, ModelComparisonResult> _comparisons = new();
+    private readonly ConcurrentDictionary<Guid, float[]> _featureImportances = new();
 
     public WinRatePredictionService(IGameStateFeatureEngineering featureEngineering)
     {
@@ -438,7 +442,11 @@ public class WinRatePredictionService : IWinRatePredictionService
         var dataList = trainingData.ToList();
         if (dataList.Count < 20)
         {
-            throw new ValidationException($"訓練資料不足，至少需要 20 筆，目前有 {dataList.Count} 筆。");
+            // 使用 FluentValidation FluentResults 或 ValidationException
+            throw new ValidationException(new[]
+            {
+                new ValidationFailure("trainingData", $"訓練資料不足，至少需要 20 筆，目前有 {dataList.Count} 筆。")
+            });
         }
 
         var dataView = _mlContext.Data.LoadFromEnumerable(dataList);
@@ -748,6 +756,9 @@ internal class BinaryPrediction
 
 ```csharp
 // Application/Features/ML/Commands/TrainWinRateModel/TrainWinRateModelHandler.cs
+using BoardGameAiDashboard.Application.Common.Exceptions;
+using FluentValidation;
+
 public sealed class TrainWinRateModelHandler
     : IRequestHandler<TrainWinRateModelCommand, ModelComparisonResult>
 {
@@ -783,8 +794,11 @@ public sealed class TrainWinRateModelHandler
         var matchList = matches.ToList();
         if (matchList.Count < 20)
         {
-            throw new ValidationException(
-                $"訓練資料不足。至少需要 20 筆，目前只有 {matchList.Count} 筆。");
+            // 使用 FluentValidation FluentResults 方式
+            throw new ValidationException(new[]
+            {
+                new ValidationFailure("GameId", $"訓練資料不足。至少需要 20 筆，目前只有 {matchList.Count} 筆。")
+            });
         }
 
         // Feature Engineering 轉換
@@ -808,6 +822,9 @@ public sealed record TrainWinRateModelCommand : IRequest<ModelComparisonResult>
 {
     public Guid GameId { get; init; }
 }
+
+// 需要引入 FluentValidation
+using FluentValidation;
 ```
 
 ### 8.2 PredictWinRateHandler
@@ -844,6 +861,8 @@ public sealed record PredictWinRateQuery : IRequest<GameStatePredictionResult>
 
 ```csharp
 // Api/Controllers/PredictionsController.cs
+// 注意：現有 PredictionsController 已存在，需擴展而非重建
+
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
@@ -856,12 +875,37 @@ public sealed class PredictionsController : ControllerBase
         _sender = sender;
     }
 
+    // ========== 現有端點（需實作） ==========
+
+    /// <summary>
+    /// Gets win rate prediction for a specific game.
+    /// </summary>
+    /// <remarks>
+    /// 目前為 placeholder，需要實作 ML 預測邏輯。
+    /// </remarks>
+    [HttpGet("win-rate/{gameId:guid}")]
+    [ProducesResponseType(typeof(WinRateDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetWinRate(
+        Guid gameId,
+        CancellationToken ct = default)
+    {
+        var query = new GetWinRateQuery { GameId = gameId };
+        var result = await _sender.Send(query, ct);
+        return Ok(result);
+    }
+
+    // ========== 新增 ML 訓練端點 ==========
+
     /// <summary>
     /// 訓練模型並比較 FastForest vs FastTree
     /// </summary>
+    /// <remarks>
+    /// 需要至少 20 筆訓練資料。
+    /// </remarks>
     [HttpPost("train/{gameId:guid}")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(ModelComparisonResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> TrainModel(
         Guid gameId,
         CancellationToken ct)
@@ -886,10 +930,10 @@ public sealed class PredictionsController : ControllerBase
     }
 
     /// <summary>
-    /// 示範：分析特定英雄Level/殺敵數對勝率的影響
+    /// 分析特定英雄 Level/殺敵數對勝率的影響
     /// </summary>
     [HttpGet("analyze/{gameId:guid}")]
-    [ProducesResponseType(typeof(Dictionary<string, float[]>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Dictionary<string, List<float>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> AnalyzeWinRateByLevel(
         Guid gameId,
         [FromQuery] int heroLevel,
@@ -898,7 +942,6 @@ public sealed class PredictionsController : ControllerBase
         [FromQuery] int totalGold,
         CancellationToken ct)
     {
-        // 模擬不同狀態下的勝率預測
         var inputs = new List<GameStatePredictionInput>();
 
         // 固定其他參數，變化 HeroLevel
@@ -938,6 +981,7 @@ public sealed class PredictionsController : ControllerBase
     /// </summary>
     [HttpGet("comparison/{gameId:guid}")]
     [ProducesResponseType(typeof(ModelComparisonResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetModelComparison(
         Guid gameId,
         CancellationToken ct)
@@ -985,9 +1029,33 @@ public static IServiceCollection AddInfrastructure(...)
 
     // ── ML Services ─────────────────────────────────────────────
     services.AddScoped<IGameStateFeatureEngineering, GameStateFeatureEngineering>();
+
+    // MLContext 是昂貴物件，必須作為 Singleton
+    // 警告：MLContext 不是執行緒安全的，每個 PredictionEngine 實例需要自己的 MLContext
     services.AddSingleton<IWinRatePredictionService, WinRatePredictionService>();
 
     return services;
+}
+```
+
+> ⚠️ **性能注意**：`WinRatePredictionService` 使用 `Singleton` 是因為 `MLContext` 初始化昂貴。但每次預測需要使用獨立的 `PredictionEngine`，不可跨執行緒共用。
+
+> 🔴 **訓練阻塞問題**：訓練是 CPU 密集操作，會阻塞 HTTP 請求。建議將訓練移至 Hangfire Background Job：
+
+```csharp
+// 使用 Hangfire 背景訓練
+[HttpPost("train/{gameId:guid}")]
+public async Task<IActionResult> TrainModel(Guid gameId)
+{
+    // 將訓練作業加入佇列，立即返回 202 Accepted
+    BackgroundJob.Enqueue(() => TrainJob(gameId));
+    return Accepted();
+}
+
+[AutomaticRetry(Attempts = 3)]
+public async Task TrainJob(Guid gameId, CancellationToken ct = default)
+{
+    // 實際訓練邏輯
 }
 ```
 
@@ -1000,20 +1068,25 @@ public static IServiceCollection AddInfrastructure(...)
 <PackageReference Include="Microsoft.ML" Version="3.0.1" />
 ```
 
+> ℹ️ **注意**：專案已安裝 Microsoft.ML 5.0.0，建議使用 5.0.0 以獲得最新功能和效能改進。如計畫中使用 3.0.1，請替換為：
+> ```xml
+> <PackageReference Include="Microsoft.ML" Version="5.0.0" />
+> ```
+
 ---
 
 ## 12. 實作步驟
 
-| 步驟 | 任務 | 檔案 |
-|------|------|------|
-| 1 | 加入 NuGet 套件 | `Infrastructure.csproj` |
-| 2 | 建立 ML 模型類別 | `GameStateTrainingData.cs`, `GameStatePredictionInput.cs`, `GameStatePredictionResult.cs`, `ModelComparisonResult.cs` |
-| 3 | 建立服務介面 | `IWinRatePredictionService.cs`, `IGameStateFeatureEngineering.cs` |
-| 4 | 實作 Feature Engineering | `GameStateFeatureEngineering.cs` |
-| 5 | 實作 ML 訓練服務 | `WinRatePredictionService.cs` |
-| 6 | 實作 CQRS Handlers | `TrainWinRateModelHandler.cs`, `PredictWinRateHandler.cs`, `GetModelComparisonHandler.cs` |
-| 7 | 擴展 Controller | `PredictionsController.cs` |
-| 8 | 更新 DI 註冊 | `DependencyInjection.cs` |
+| 步驟 | 任務 | 檔案 | 說明 |
+|------|------|------|------|
+| 1 | ~~加入 NuGet 套件~~ | - | Microsoft.ML 5.0.0 已存在 |
+| 2 | 建立 ML 模型類別 | `Application/Features/ML/Models/*.cs` | |
+| 3 | 建立服務介面 | `Application/Features/ML/Interfaces/*.cs` | |
+| 4 | 實作 Feature Engineering | `Infrastructure/Services/ML/GameStateFeatureEngineering.cs` | |
+| 5 | 實作 ML 訓練服務 | `Infrastructure/Services/ML/WinRatePredictionService.cs` | Singleton |
+| 6 | 實作 CQRS Handlers | `Application/Features/ML/Commands/TrainWinRateModel/*.cs` | |
+| 7 | 擴展 Controller | `Api/Controllers/PredictionsController.cs` | 擴展現有檔案，新增訓練端點 |
+| 8 | 更新 DI 註冊 | `DependencyInjection.cs` | |
 
 ---
 
