@@ -1,7 +1,7 @@
-# EF Core 遷移技能
-
-## 觸發時機
-當使用者需要新增資料庫遷移、更新結構、建立新實體，或使用 Entity Framework Core 時使用此技能。
+---
+name: efcore-migration
+description: 新增資料庫遷移、更新結構、建立新實體，或使用 Entity Framework Core
+---
 
 ## 說明
 

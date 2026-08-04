@@ -1,7 +1,7 @@
-# Angular Signals Skill
-
-## Trigger
-當使用者需要實作 Angular 19 前端功能、建立元件、管理狀態、或處理 HTTP 請求時使用此技能。
+---
+name: angular-signals
+description: 實作 Angular 19 前端功能、建立元件、管理狀態、或處理 HTTP 請求
+---
 
 ## 架構概覽
 

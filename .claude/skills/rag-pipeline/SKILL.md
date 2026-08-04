@@ -1,7 +1,7 @@
-# RAG 流程技能
-
-## 觸發時機
-當使用者需要實作 RAG 功能、建置 RAG 流程、建立向量搜尋、擷取文件，或任何與 AI 聊天、嵌入（embeddings）或知識庫相關的功能時使用此技能。
+---
+name: rag-pipeline
+description: 實作 RAG 功能、建置 RAG 流程、建立向量搜尋、擷取文件，或任何與 AI 聊天、嵌入（embeddings）或知識庫相關的功能
+---
 
 ## 架構概覽
 
