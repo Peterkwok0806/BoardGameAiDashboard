@@ -161,6 +161,56 @@ DashboardFrontend/src/environments/environment.development.ts
 !DashboardFrontend/src/environments/environment.prod.ts
 
 ## ---------------------------------------------------------------
+## Python / ML Training
+## ---------------------------------------------------------------
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+
+# pip / pipenv / poetry
+*.egg-info/
+Pipfile.lock
+poetry.lock
+requirements.txt.bak
+*.whl
+
+# pyenv / virtualenv
+.python-version
+.python-versions/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# ML Trainer outputs (keep .gitkeep, ignore generated models)
+ml_trainer/models/*.onnx
+ml_trainer/models/*.json
+ml_trainer/models/_features.json
+ml_trainer/models/_report.json
+ml_trainer/models/_cv_results.json
+ml_trainer/models/_feature_importance.json
+!ml_trainer/models/.gitkeep
+
+# Training data (local training samples)
+training_data.csv
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+## ---------------------------------------------------------------
 ## Entity Framework Core
 ## ---------------------------------------------------------------
 # Do NOT ignore Migrations/ — they must be tracked in source control

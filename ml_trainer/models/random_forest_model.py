@@ -250,9 +250,9 @@ class RandomForestModel:
         with open(output_path, 'wb') as f:
             f.write(onnx_model.SerializeToString())
 
-        print(f"✓ ONNX model saved: {output_path}")
-        print(f"  Input: {self.ONNX_INPUT_NAME}, shape: [?, {n_features}]")
-        print(f"  Outputs: {self.ONNX_OUTPUT_LABEL}, {self.ONNX_OUTPUT_PROBABILITY}")
+        print(f"[OK] ONNX model saved: {output_path}")
+        print(f"     Input: {self.ONNX_INPUT_NAME}, shape: [?, {n_features}]")
+        print(f"     Outputs: {self.ONNX_OUTPUT_LABEL}, {self.ONNX_OUTPUT_PROBABILITY}")
 
         # Save feature columns JSON
         self._save_feature_info(output_path, feature_columns)
@@ -284,7 +284,7 @@ class RandomForestModel:
         with open(feature_info_path, 'w', encoding='utf-8') as f:
             json.dump(feature_info, f, indent=2)
 
-        print(f"  Feature info saved: {feature_info_path}")
+        print(f"[OK] Feature info saved: {feature_info_path}")
         return feature_info_path
 
     def save(self, path: str) -> str:
@@ -308,7 +308,7 @@ class RandomForestModel:
             'min_samples_leaf': self.min_samples_leaf
         }, path)
 
-        print(f"✓ Model saved: {path}")
+        print(f"[OK] Model saved: {path}")
         return str(path)
 
     @classmethod
@@ -333,7 +333,7 @@ class RandomForestModel:
         instance.feature_columns_ = data['feature_columns']
         instance._is_fitted = True
 
-        print(f"✓ Model loaded: {path}")
+        print(f"[OK] Model loaded: {path}")
         return instance
 
 

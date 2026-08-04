@@ -185,10 +185,9 @@ def validate_input(df: pd.DataFrame, min_samples: int = 10) -> None:
     if min_class_ratio < 0.1:
         import warnings
         warnings.warn(
-            f"Severe class imbalance detected: "
+            f"[WARNING] Severe class imbalance: "
             f"minority class is {min_class_ratio:.1%} of samples. "
-            f"Consider using stratified sampling or class weights.",
-            UserWarning
+            f"Consider using stratified sampling or class weights."
         )
 
 

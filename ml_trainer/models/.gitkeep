@@ -1,0 +1,2 @@
+# This file ensures the models directory is tracked in git
+# Generated ONNX models and JSON files are ignored via .gitignore

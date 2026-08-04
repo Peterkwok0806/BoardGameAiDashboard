@@ -191,13 +191,13 @@ def print_confusion_matrix(y_true, y_pred):
 def print_feature_importance(model: RandomForestModel, top_n: int = 10):
     """Print feature importance in a readable format."""
     print(f"\nTop {top_n} Feature Importance:")
-    print("-" * 40)
-    print(f"{'Feature':<20} {'Importance':>10}")
-    print("-" * 40)
+    print("-" * 50)
+    print(f"{'Feature':<20} {'Importance':>12} {'Score':>8}")
+    print("-" * 50)
 
     for name, importance in model.get_top_features(top_n):
-        bar = "█" * int(importance * 50)
-        print(f"{name:<20} {importance:>10.4f} {bar}")
+        score = int(importance * 100)
+        print(f"{name:<20} {importance:>12.4f} [{score:3d}%]")
 
 
 def main():
@@ -289,7 +289,7 @@ Examples:
         print("\nValidating input data...")
         try:
             validate_input(df, args.min_samples)
-            print("✓ Validation passed")
+            print("[OK] Validation passed")
         except ValueError as e:
             print(f"\nError: {e}")
             sys.exit(1)
@@ -351,7 +351,7 @@ Examples:
     print("=" * 60)
 
     model.fit(X, y)
-    print(f"✓ Final model trained on {len(X)} samples")
+    print(f"[OK] Final model trained on {len(X)} samples")
 
     # =========================================================================
     # Step 5: Export Model
@@ -387,14 +387,14 @@ Examples:
     report_path = output_dir / f'training_report_{timestamp}.json'
     with open(report_path, 'w', encoding='utf-8') as f:
         json.dump(result.to_dict(), f, indent=2, ensure_ascii=False)
-    print(f"✓ Training report: {report_path}")
+    print(f"[OK] Training report: {report_path}")
 
     # Feature importance
     importance_path = output_dir / f'feature_importance_{timestamp}.json'
     importance = model.get_feature_importance()
     with open(importance_path, 'w', encoding='utf-8') as f:
         json.dump(importance, f, indent=2)
-    print(f"✓ Feature importance: {importance_path}")
+    print(f"[OK] Feature importance: {importance_path}")
 
     # Cross-validation details
     cv_path = output_dir / f'cv_results_{timestamp}.json'
@@ -404,7 +404,7 @@ Examples:
             'per_fold': fold_metrics,
             'average': avg_metrics.to_dict()
         }, f, indent=2)
-    print(f"✓ CV results: {cv_path}")
+    print(f"[OK] CV results: {cv_path}")
 
     # =========================================================================
     # Summary
