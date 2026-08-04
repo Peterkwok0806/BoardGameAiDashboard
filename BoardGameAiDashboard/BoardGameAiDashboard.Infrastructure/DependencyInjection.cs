@@ -1,9 +1,11 @@
 using System.Text;
 using BoardGameAiDashboard.Application.Common.Interfaces;
+using BoardGameAiDashboard.Application.Features.ML.Interfaces;
 using BoardGameAiDashboard.Infrastructure.Common.Repositories;
 using BoardGameAiDashboard.Infrastructure.Persistence;
 using BoardGameAiDashboard.Infrastructure.Services;
 using BoardGameAiDashboard.Infrastructure.Services.Auth;
+using BoardGameAiDashboard.Infrastructure.Services.ML;
 using BoardGameAiDashboard.Infrastructure.Settings;
 using Hangfire;
 using Hangfire.SqlServer;
@@ -11,6 +13,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.SemanticKernel;
@@ -153,6 +156,18 @@ public static class DependencyInjection
         services.AddScoped<IQueryRewriter, LlmQueryRewriter>();
         services.AddScoped<IDocumentIngestionService, DocumentIngestionService>();
         services.AddScoped<IRagService, RagService>();
+
+        // ── ML Prediction Services ──────────────────────────────────────────
+        services.Configure<MLSettings>(configuration.GetSection(MLSettings.SectionName));
+
+        // FeatureEngineeringService is stateless — register as Singleton for efficiency
+        services.AddSingleton<IFeatureEngineeringService, FeatureEngineeringService>();
+
+        // CsvExportService needs IUnitOfWork (Scoped) — must be Scoped
+        services.AddScoped<ICsvExportService, CsvExportService>();
+
+        // OnnxRuntime InferenceSession is thread-safe, use Singleton
+        services.AddSingleton<IWinRatePredictionService, WinRatePredictionService>();
 
         return services;
     }

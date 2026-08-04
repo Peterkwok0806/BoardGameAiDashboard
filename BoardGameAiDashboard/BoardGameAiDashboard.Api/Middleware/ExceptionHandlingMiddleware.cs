@@ -40,7 +40,7 @@ public sealed class ExceptionHandlingMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unhandled exception: {Message}", ex.Message);
+            _logger.LogError(ex, "Unhandled exception: {Message}\nStackTrace: {StackTrace}", ex.Message, ex.StackTrace);
             await HandleExceptionAsync(context, ex);
         }
     }
@@ -70,6 +70,9 @@ public sealed class ExceptionHandlingMiddleware
 
             ValidationException validation =>
                 (HttpStatusCode.BadRequest, "Validation Error", "One or more validation errors occurred."),
+
+            PredictionException prediction =>
+                (HttpStatusCode.ServiceUnavailable, "ML Service Unavailable", prediction.Message),
 
             // ── Unexpected Exceptions ────────────────────────────────
             _ =>

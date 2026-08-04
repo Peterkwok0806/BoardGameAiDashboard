@@ -1,0 +1,29 @@
+{
+  "model_name": "RandomForest",
+  "feature_columns": [
+    "player_count",
+    "hour_of_day",
+    "day_of_week",
+    "hero_level",
+    "hero_kills",
+    "deaths",
+    "unit_kills",
+    "total_gold",
+    "highest_atk",
+    "highest_def",
+    "highest_speed",
+    "atk_range",
+    "gold_per_level",
+    "atk_per_level",
+    "def_per_level",
+    "speed_per_level",
+    "kd_ratio",
+    "total_kills",
+    "gold_efficiency",
+    "death_ratio"
+  ],
+  "feature_count": 20,
+  "n_estimators": 100,
+  "max_depth": 10,
+  "min_samples_leaf": 5
+}
