@@ -55,6 +55,14 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'predictions',
+    loadComponent: () =>
+      import('./features/prediction/components/prediction-dashboard.component').then(
+        (m) => m.PredictionDashboardComponent
+      ),
+    canActivate: [authGuard],
+  },
+  {
     path: '**',
     redirectTo: 'login',
   },

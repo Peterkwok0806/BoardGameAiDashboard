@@ -1,0 +1,39 @@
+<div class="model-status-card" [class.loaded]="isModelLoaded()" [class.unloaded]="!isModelLoaded()">
+  <!-- Status Indicator -->
+  <div class="status-indicator">
+    @if (isLoading()) {
+      <app-loading-spinner [size]="'sm'"></app-loading-spinner>
+    } @else {
+      <div class="status-dot" [class.active]="isModelLoaded()"></div>
+    }
+    <span class="status-label">
+      @if (isLoading()) {
+        載入中...
+      } @else if (isModelLoaded()) {
+        模型已就緒
+      } @else {
+        模型未載入
+      }
+    </span>
+  </div>
+
+  <!-- Status Details -->
+  <div class="status-details">
+    <div class="detail-item">
+      <span class="detail-label">模型路徑</span>
+      <span class="detail-value" [title]="modelPath()">{{ modelPath() }}</span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-label">最後更新</span>
+      <span class="detail-value">{{ formattedTimestamp() }}</span>
+    </div>
+  </div>
+
+  <!-- Reload Button -->
+  <button class="reload-btn" (click)="onReload()" [disabled]="isLoading()" title="重新整理狀態">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="23 4 23 10 17 10"></polyline>
+      <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+    </svg>
+  </button>
+</div>

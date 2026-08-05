@@ -1,0 +1,215 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="prediction-form">
+  <!-- Combat Stats -->
+  <div class="form-section">
+    <h3 class="form-section-title">戰鬥數值</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="heroLevel">英雄等級</label>
+        <input
+          type="number"
+          id="heroLevel"
+          formControlName="heroLevel"
+          [class.error]="hasError('heroLevel', 'min') || hasError('heroLevel', 'max')"
+          min="1"
+          max="30" />
+        @if (hasError('heroLevel', 'required')) {
+          <span class="error-text">請輸入英雄等級</span>
+        }
+        @if (hasError('heroLevel', 'min') || hasError('heroLevel', 'max')) {
+          <span class="error-text">範圍: 1-30</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="heroKills">英雄擊殺</label>
+        <input
+          type="number"
+          id="heroKills"
+          formControlName="heroKills"
+          [class.error]="hasError('heroKills', 'min') || hasError('heroKills', 'max')"
+          min="0"
+          max="50" />
+        @if (hasError('heroKills', 'min') || hasError('heroKills', 'max')) {
+          <span class="error-text">範圍: 0-50</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="deaths">死亡次數</label>
+        <input
+          type="number"
+          id="deaths"
+          formControlName="deaths"
+          [class.error]="hasError('deaths', 'min') || hasError('deaths', 'max')"
+          min="0"
+          max="30" />
+        @if (hasError('deaths', 'min') || hasError('deaths', 'max')) {
+          <span class="error-text">範圍: 0-30</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="unitKills">小兵擊殺</label>
+        <input
+          type="number"
+          id="unitKills"
+          formControlName="unitKills"
+          [class.error]="hasError('unitKills', 'min') || hasError('unitKills', 'max')"
+          min="0"
+          max="200" />
+        @if (hasError('unitKills', 'min') || hasError('unitKills', 'max')) {
+          <span class="error-text">範圍: 0-200</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Economy Stats -->
+  <div class="form-section">
+    <h3 class="form-section-title">經濟數值</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="totalGold">金幣總量</label>
+        <input
+          type="number"
+          id="totalGold"
+          formControlName="totalGold"
+          [class.error]="hasError('totalGold', 'min') || hasError('totalGold', 'max')"
+          min="0"
+          max="100000" />
+        @if (hasError('totalGold', 'min') || hasError('totalGold', 'max')) {
+          <span class="error-text">範圍: 0-100000</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Character Stats -->
+  <div class="form-section">
+    <h3 class="form-section-title">角色屬性</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="highestAtk">最高攻擊</label>
+        <input
+          type="number"
+          id="highestAtk"
+          formControlName="highestAtk"
+          [class.error]="hasError('highestAtk', 'min') || hasError('highestAtk', 'max')"
+          min="0"
+          max="500" />
+        @if (hasError('highestAtk', 'min') || hasError('highestAtk', 'max')) {
+          <span class="error-text">範圍: 0-500</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="highestDef">最高防禦</label>
+        <input
+          type="number"
+          id="highestDef"
+          formControlName="highestDef"
+          [class.error]="hasError('highestDef', 'min') || hasError('highestDef', 'max')"
+          min="0"
+          max="500" />
+        @if (hasError('highestDef', 'min') || hasError('highestDef', 'max')) {
+          <span class="error-text">範圍: 0-500</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="highestSpeed">最高速度</label>
+        <input
+          type="number"
+          id="highestSpeed"
+          formControlName="highestSpeed"
+          [class.error]="hasError('highestSpeed', 'min') || hasError('highestSpeed', 'max')"
+          min="0"
+          max="1000" />
+        @if (hasError('highestSpeed', 'min') || hasError('highestSpeed', 'max')) {
+          <span class="error-text">範圍: 0-1000</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="atkRange">攻擊範圍</label>
+        <input
+          type="number"
+          id="atkRange"
+          formControlName="atkRange"
+          [class.error]="hasError('atkRange', 'min') || hasError('atkRange', 'max')"
+          min="0"
+          max="500" />
+        @if (hasError('atkRange', 'min') || hasError('atkRange', 'max')) {
+          <span class="error-text">範圍: 0-500</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Match Settings -->
+  <div class="form-section">
+    <h3 class="form-section-title">對戰設定</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="playerCount">玩家人數</label>
+        <input
+          type="number"
+          id="playerCount"
+          formControlName="playerCount"
+          [class.error]="hasError('playerCount', 'min') || hasError('playerCount', 'max')"
+          min="2"
+          max="10" />
+        @if (hasError('playerCount', 'min') || hasError('playerCount', 'max')) {
+          <span class="error-text">範圍: 2-10</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="hourOfDay">時間 (小時)</label>
+        <input
+          type="number"
+          id="hourOfDay"
+          formControlName="hourOfDay"
+          [class.error]="hasError('hourOfDay', 'min') || hasError('hourOfDay', 'max')"
+          min="0"
+          max="23" />
+        @if (hasError('hourOfDay', 'min') || hasError('hourOfDay', 'max')) {
+          <span class="error-text">範圍: 0-23</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="dayOfWeek">星期 (0=日, 6=六)</label>
+        <input
+          type="number"
+          id="dayOfWeek"
+          formControlName="dayOfWeek"
+          [class.error]="hasError('dayOfWeek', 'min') || hasError('dayOfWeek', 'max')"
+          min="0"
+          max="6" />
+        @if (hasError('dayOfWeek', 'min') || hasError('dayOfWeek', 'max')) {
+          <span class="error-text">範圍: 0-6</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Actions -->
+  <div class="form-actions">
+    <button type="button" class="btn btn-secondary" (click)="resetForm()">
+      重置
+    </button>
+    <button type="submit" class="btn btn-primary" [disabled]="isLoading()">
+      @if (isLoading()) {
+        <app-loading-spinner [size]="'sm'"></app-loading-spinner>
+        <span>預測中...</span>
+      } @else {
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        <span>開始預測</span>
+      }
+    </button>
+  </div>
+</form>

@@ -1,4 +1,5 @@
-﻿using BoardGameAiDashboard.Api.Filters;
+﻿using System.Text.Json;
+using BoardGameAiDashboard.Api.Filters;
 using BoardGameAiDashboard.Api.Middleware;
 using BoardGameAiDashboard.Application;
 using BoardGameAiDashboard.Infrastructure;
@@ -46,6 +47,12 @@ builder.Services.AddControllers(options =>
 {
     // Auto-wrap all successful responses in { success, data, timestamp } envelope
     options.Filters.Add<ApiResultFilter>();
+})
+.AddJsonOptions(options =>
+{
+    // Accept camelCase JSON from Angular frontend (e.g., "hourOfDay" instead of "HourOfDay")
+    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
