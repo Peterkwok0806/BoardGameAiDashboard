@@ -199,7 +199,7 @@ dotnet build --no-restore /p:TreatWarningsAsErrors=true  # 嚴格建置
 2. **薄 Controller**：HTTP 處理放在 Controller，業務邏輯放在 CQRS Handlers
 3. **軟刪除**：所有實體都有 `IsDeleted` 欄位，查詢自動過濾已刪除資料
 4. **RAG 流程**：必須先分塊 -> 嵌入 -> 檢索 -> 回答，嚴禁直接傳送整份 PDF 給 LLM
-5. **Metadata 過濾**：Qdrant 搜尋時必須過濾 `game_id` 和 `section_title`
+5. **Metadata 過濾**：Qdrant 搜尋時支援依 `game_id` 進行 Metadata 過濾
 
 ## 相關文檔
 
