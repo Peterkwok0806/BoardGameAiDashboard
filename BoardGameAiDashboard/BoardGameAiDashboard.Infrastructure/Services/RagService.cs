@@ -12,10 +12,11 @@ using Microsoft.SemanticKernel.Embeddings;
 namespace BoardGameAiDashboard.Infrastructure.Services;
 
 /// <summary>
-/// Three-stage RAG pipeline:
+/// Four-stage RAG pipeline with LLM Reranking:
 /// Stage 1 — Query Rewrite: use LLM to convert follow-up into standalone query
-/// Stage 2 — Retrieve: embed rewritten query → Qdrant vector search
-/// Stage 3 — Generate: assemble answer with full conversation history + retrieved context
+/// Stage 2 — Retrieve: embed rewritten query → Qdrant vector search (top 5)
+/// Stage 3 — Rerank: use LLM to evaluate relevance and select top 3 most relevant chunks
+/// Stage 4 — Generate: assemble answer with filtered context
 /// </summary>
 public sealed class RagService : IRagService
 {
@@ -24,6 +25,12 @@ public sealed class RagService : IRagService
     private readonly ITextEmbeddingGenerationService _embeddingService;
     private readonly IQueryRewriter _queryRewriter;
     private readonly ILogger<RagService> _logger;
+
+    /// <summary>Number of chunks to retrieve initially from vector search</summary>
+    private const int InitialTopK = 5;
+
+    /// <summary>Number of chunks to keep after reranking</summary>
+    private const int FinalTopK = 3;
 
     public RagService(
         IVectorSearchService vectorSearchService,
@@ -50,7 +57,11 @@ public sealed class RagService : IRagService
             "RAG query (no history): '{Message}', gameId={GameId}", userMessage, gameId);
 
         var searchResults = await VectorSearchAsync(userMessage, gameId, cancellationToken);
-        return await GenerateAnswerAsync(userMessage, searchResults, history: null, cancellationToken);
+
+        // Apply LLM reranking
+        var rerankedResults = await RerankChunksAsync(userMessage, searchResults, cancellationToken);
+
+        return await GenerateAnswerAsync(userMessage, rerankedResults, history: null, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -72,8 +83,11 @@ public sealed class RagService : IRagService
         // ── Stage 2: Retrieve (embed + vector search with rewritten query) ──
         var searchResults = await VectorSearchAsync(rewrittenQuery, gameId, cancellationToken);
 
-        // ── Stage 3: Generate (answer with history + context) ──
-        return await GenerateAnswerAsync(question, searchResults, history, cancellationToken);
+        // ── Stage 3: LLM Reranking ──
+        var rerankedResults = await RerankChunksAsync(question, searchResults, cancellationToken);
+
+        // ── Stage 4: Generate (answer with filtered context) ──
+        return await GenerateAnswerAsync(question, rerankedResults, history, cancellationToken);
     }
 
     private async Task<IReadOnlyList<VectorSearchResult>> VectorSearchAsync(
@@ -89,7 +103,7 @@ public sealed class RagService : IRagService
 
         var searchResults = await _vectorSearchService.SearchAsync(
             queryEmbedding: embeddingArray,
-            topK: 5,
+            topK: InitialTopK,
             gameId: gameId,
             cancellationToken: cancellationToken);
 
@@ -97,8 +111,155 @@ public sealed class RagService : IRagService
         {
             _logger.LogWarning("No relevant context found in Qdrant for query");
         }
+        else
+        {
+            _logger.LogInformation(
+                "Vector search returned {Count} chunks (will be reranked to top {TopK})",
+                searchResults.Count, FinalTopK);
+        }
 
         return searchResults;
+    }
+
+    /// <summary>
+    /// Stage 3: Use LLM to evaluate relevance of each chunk and rerank them.
+    /// Returns only the top K most relevant chunks.
+    /// </summary>
+    private async Task<IReadOnlyList<VectorSearchResult>> RerankChunksAsync(
+        string question,
+        IReadOnlyList<VectorSearchResult> searchResults,
+        CancellationToken cancellationToken)
+    {
+        if (searchResults.Count == 0)
+        {
+            return searchResults;
+        }
+
+        _logger.LogInformation(
+            "Reranking {Count} chunks using LLM for question: '{Question}'",
+            searchResults.Count, question);
+
+        var rerankingPrompt = $@"You are a relevance evaluator for a board game rules question-answering system.
+
+Question: {question}
+
+Evaluate each chunk's relevance to answering the question.
+Respond with ONLY a JSON array of numbers (0 or 1), one per chunk in order.
+- 1 = Relevant (helps answer the question)
+- 0 = Not Relevant (does not help answer)
+
+Chunks to evaluate:
+{string.Join("\n", searchResults.Select((r, i) => $"Chunk {i + 1} [{r.SectionTitle}]: {TruncateForReranking(r.Content)}"))}
+
+Example response format:
+[1, 0, 1, 0, 1]
+
+Respond with ONLY the JSON array, nothing else.";
+
+        try
+        {
+            var completion = await _chatCompletionService
+                .GetChatMessageContentAsync(rerankingPrompt, cancellationToken: cancellationToken);
+
+            var responseText = completion.Content?.Trim() ?? "";
+
+            // Parse the JSON array response
+            var relevanceScores = ParseRelevanceScores(responseText, searchResults.Count);
+
+            // Sort by relevance score (descending), then by original vector score as tiebreaker
+            var reranked = searchResults
+                .Select((result, index) => new { Result = result, Relevance = relevanceScores[index] })
+                .Where(x => x.Relevance > 0) // Only keep relevant chunks
+                .OrderByDescending(x => x.Relevance)
+                .ThenByDescending(x => x.Result.Score)
+                .Take(FinalTopK)
+                .Select(x => x.Result)
+                .ToList();
+
+            var keptCount = reranked.Count;
+            var filteredCount = searchResults.Count - keptCount;
+
+            _logger.LogInformation(
+                "Reranking complete: kept {Kept}/{Total} chunks (filtered {Filtered} irrelevant)",
+                keptCount, searchResults.Count, filteredCount);
+
+            // Log which chunks were kept
+            for (int i = 0; i < reranked.Count; i++)
+            {
+                _logger.LogDebug(
+                    "  Reranked chunk {Rank}: [{Section}] (vector score: {Score:F4})",
+                    i + 1, reranked[i].SectionTitle, reranked[i].Score);
+            }
+
+            return reranked;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "LLM reranking failed, falling back to original order");
+
+            // Fallback: return top K by vector score
+            return searchResults
+                .OrderByDescending(r => r.Score)
+                .Take(FinalTopK)
+                .ToList();
+        }
+    }
+
+    /// <summary>
+    /// Parse LLM response to extract relevance scores.
+    /// Expected format: [1, 0, 1, 0, 1]
+    /// </summary>
+    private static List<int> ParseRelevanceScores(string response, int expectedCount)
+    {
+        var scores = new List<int>();
+
+        try
+        {
+            // Try to parse as JSON array
+            var trimmed = response.Trim();
+            if (trimmed.StartsWith("[") && trimmed.EndsWith("]"))
+            {
+                var parts = trimmed.Trim('[', ']', ' ')
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (var part in parts)
+                {
+                    if (int.TryParse(part.Trim(), out var score))
+                    {
+                        scores.Add(Math.Clamp(score, 0, 1)); // Clamp to 0 or 1
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Parsing failed
+        }
+
+        // If parsing failed or wrong count, return all 1s (optimistic)
+        while (scores.Count < expectedCount)
+        {
+            scores.Add(1);
+        }
+
+        return scores.Take(expectedCount).ToList();
+    }
+
+    /// <summary>
+    /// Truncate content for reranking prompt to avoid token limits.
+    /// </summary>
+    private static string TruncateForReranking(string content, int maxLength = 400)
+    {
+        if (string.IsNullOrEmpty(content))
+            return "(empty)";
+
+        // Clean up whitespace
+        var cleaned = System.Text.RegularExpressions.Regex.Replace(content, @"\s+", " ");
+
+        if (cleaned.Length <= maxLength)
+            return cleaned;
+
+        return cleaned.Substring(0, maxLength) + "...";
     }
 
     private async Task<RagResponse> GenerateAnswerAsync(
