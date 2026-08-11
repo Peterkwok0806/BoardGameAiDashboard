@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoardGameAiDashboard.Applic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoardGameAiDashboard.Infrastructure", "BoardGameAiDashboard.Infrastructure\BoardGameAiDashboard.Infrastructure.csproj", "{4D4D2D49-EB75-46AE-A87E-1D611375CEF0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoardGameAiDashboard.IntegrationTests", "BoardGameAiDashboard.IntegrationTests\BoardGameAiDashboard.IntegrationTests.csproj", "{F8A9C2E1-3B5D-4E6F-A7B8-C9D0E1F2A3B4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{4D4D2D49-EB75-46AE-A87E-1D611375CEF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4D4D2D49-EB75-46AE-A87E-1D611375CEF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4D4D2D49-EB75-46AE-A87E-1D611375CEF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8A9C2E1-3B5D-4E6F-A7B8-C9D0E1F2A3B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8A9C2E1-3B5D-4E6F-A7B8-C9D0E1F2A3B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8A9C2E1-3B5D-4E6F-A7B8-C9D0E1F2A3B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8A9C2E1-3B5D-4E6F-A7B8-C9D0E1F2A3B4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

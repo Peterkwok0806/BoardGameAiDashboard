@@ -323,9 +323,11 @@ public sealed class DocumentIngestionService : IDocumentIngestionService
     }
 
     /// <summary>
-    /// Attempt to detect section breaks via heuristics:
-    /// - Lines that are TITLE CASE or ALL CAPS (>= 3 chars, no period)
-    /// - Lines starting with ## or ### (markdown headings)
+    /// Attempt to detect section breaks via heuristics.
+    /// Based on PDF structure analysis:
+    /// - Main headings are ALL CAPS (e.g., LORE, OVERVIEW, GAME SETUP, ROUND STRUCTURE)
+    /// - Sub-headings are Title Case (e.g., Heroes, Teams, Zones and Thrones)
+    /// - PdfPig may concatenate heading + content (e.g., "3OVERVIEWHeroesIn Guards...")
     /// </summary>
     private static IReadOnlyList<DocumentSection> TryHeuristicSplit(string text)
     {
@@ -334,18 +336,13 @@ public sealed class DocumentIngestionService : IDocumentIngestionService
         var currentTitle = "Preamble";
         var currentContent = new System.Text.StringBuilder();
 
-        var headingPattern = new Regex(
-            @"^(#{1,3}\s+.+|[A-Z][A-Z\s]{2,}[^\.\n]*$|[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+\s*$)",
-            RegexOptions.Multiline);
-
         foreach (var line in lines)
         {
             var trimmedLine = line.Trim();
 
-            if (trimmedLine.Length > 3 &&
-                trimmedLine.Length < 80 &&
-                headingPattern.IsMatch(trimmedLine) &&
-                !trimmedLine.Contains("  "))
+            string? headingTitle = TryExtractMainHeading(trimmedLine);
+
+            if (headingTitle != null)
             {
                 // Save previous section
                 if (currentContent.Length > 0)
@@ -354,17 +351,11 @@ public sealed class DocumentIngestionService : IDocumentIngestionService
                         currentTitle, currentContent.ToString().Trim()));
                 }
 
-                // Clean markdown heading markers
-                currentTitle = trimmedLine
-                    .Replace("#", string.Empty)
-                    .Trim();
-
+                currentTitle = headingTitle;
                 currentContent.Clear();
             }
-            else
-            {
-                currentContent.AppendLine(line);
-            }
+
+            currentContent.AppendLine(line);
         }
 
         // Save final section
@@ -375,5 +366,82 @@ public sealed class DocumentIngestionService : IDocumentIngestionService
         }
 
         return sections;
+    }
+
+    /// <summary>
+    /// Extracts a main heading from a line.
+    /// Main headings are ALL CAPS (e.g., "OVERVIEW", "GAME SETUP", "LEVELING UP").
+    /// Sub-headings (Title Case like "Heroes", "Teams") are NOT considered main headings.
+    /// Handles PdfPig's concatenated format with subtitle prefixes.
+    /// </summary>
+    private static string? TryExtractMainHeading(string line)
+    {
+        if (string.IsNullOrWhiteSpace(line) || line.Length < 2)
+            return null;
+
+        // Remove leading page number (e.g., "3OVERVIEWHeroes" → "OVERVIEWHeroes")
+        var withoutPageNum = Regex.Replace(line, @"^\d+", "");
+        if (string.IsNullOrWhiteSpace(withoutPageNum))
+            return null;
+
+        // Strategy: Find ALL CAPS words anywhere in the line
+        // The heading is typically followed by content (lowercase) or has a subtitle prefix
+        // e.g., "Game StructureROUND STRUCTUREThe" → "ROUND STRUCTURE"
+        // e.g., "ACTION CARD ANATOMYCard Name" → "ACTION CARD ANATOMY"
+
+        // Pattern: Non-greedy match of uppercase words followed by lowercase or digit
+        var match = Regex.Match(withoutPageNum, @"([A-Z][A-Z\s]+?)(?=[A-Z][a-z]|\d[^A-Z]|$)");
+        if (match.Success)
+        {
+            var heading = match.Groups[1].Value.Trim();
+            // Filter out false positives (too short like "II", "III", "RR" are card tiers)
+            if (heading.Length >= 4 && IsAllUppercaseWords(heading))
+                return heading;
+        }
+
+        // Fallback: If no lowercase transition, try to find standalone uppercase words
+        var fallbackMatch = Regex.Match(withoutPageNum, @"([A-Z][A-Z\s]+)");
+        if (fallbackMatch.Success)
+        {
+            var heading = fallbackMatch.Groups[1].Value.Trim();
+            // Filter out false positives
+            if (heading.Length >= 4 && IsAllUppercaseWords(heading))
+                return heading;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Checks if a string contains only uppercase words (ignoring numbers and punctuation).
+    /// e.g., "GAME SETUP" → true
+    /// e.g., "OVERVIEWHeroes" → true (OVERVIEW is uppercase)
+    /// e.g., "Heroes" → false
+    /// </summary>
+    private static bool IsAllUppercaseWords(string text)
+    {
+        var words = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (words.Length == 0) return false;
+
+        foreach (var word in words)
+        {
+            if (word.All(c => !char.IsLetter(c)))
+                continue;
+
+            var letters = word.Where(char.IsLetter).ToArray();
+            if (letters.Length > 0 && !letters.All(char.IsUpper))
+                return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Checks if a string is entirely uppercase (ignoring non-letters).
+    /// </summary>
+    private static bool IsAllUppercase(string text)
+    {
+        var letters = text.Where(char.IsLetter).ToArray();
+        return letters.Length > 0 && letters.All(char.IsUpper);
     }
 }
