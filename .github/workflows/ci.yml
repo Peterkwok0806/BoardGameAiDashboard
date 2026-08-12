@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  NODE_VERSION: '20'
+
+jobs:
+  backend-build:
+    name: Backend Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('BoardGameAiDashboard/**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore BoardGameAiDashboard/BoardGameAiDashboard.sln
+
+      - name: Build
+        run: dotnet build BoardGameAiDashboard/BoardGameAiDashboard.sln --no-restore --configuration Release
+
+      - name: Unit Tests
+        run: dotnet test BoardGameAiDashboard/BoardGameAiDashboard.Tests/BoardGameAiDashboard.Tests.csproj --no-build --configuration Release --verbosity normal
+
+  frontend-build:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: DashboardFrontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./DashboardFrontend
+        run: npm ci
+
+      - name: Build
+        working-directory: ./DashboardFrontend
+        run: npm run build
