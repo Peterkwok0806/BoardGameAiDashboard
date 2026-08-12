@@ -1,6 +1,6 @@
 import { Component, input, output, signal, computed, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { NgChartsModule } from 'ng2-charts';
+import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartOptions } from 'chart.js';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import type { LevelAnalysisResult } from '../../../core/models/prediction.model';
@@ -18,7 +18,7 @@ import { DEFAULT_PREDICTION_INPUT } from '../../../core/models/prediction.model'
  */
 @Component({
   selector: 'app-level-analysis-chart',
-  imports: [ReactiveFormsModule, NgChartsModule, LoadingSpinnerComponent],
+  imports: [ReactiveFormsModule, BaseChartDirective, LoadingSpinnerComponent],
   templateUrl: './level-analysis-chart.component.html',
   styleUrl: './level-analysis-chart.component.css',
 })
