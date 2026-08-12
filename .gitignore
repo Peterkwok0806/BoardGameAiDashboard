@@ -155,9 +155,7 @@ secrets.json
 Properties/serviceDependencies.json
 Properties/serviceDependencies.local.json
 
-# Angular environment files (use environment.prod.ts template)
-DashboardFrontend/src/environments/environment.ts
-DashboardFrontend/src/environments/environment.development.ts
+# Angular environment files
 !DashboardFrontend/src/environments/environment.prod.ts
 
 ## ---------------------------------------------------------------
