@@ -6,6 +6,7 @@ using BoardGameAiDashboard.Infrastructure;
 using Hangfire;
 using Hangfire.Dashboard;
 using Serilog;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -123,5 +124,67 @@ app.UseAuthorization();
 
 // ── Map Endpoints ───────────────────────────────────────────────────
 app.MapControllers();
+
+// ── Health Check Endpoint ─────────────────────────────────────────────
+app.MapGet("/health", () => Results.Ok(new { status = "Healthy", timestamp = DateTime.UtcNow }));
+
+// ── Auto-Apply Database Migrations (with retry for SQL Server startup delay) ──
+bool isMigrationSuccessful = false;
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
+
+    // 取得資料庫上下文
+    var context = services.GetRequiredService<BoardGameAiDashboard.Infrastructure.Persistence.ApplicationDbContext>();
+
+    int retryCount = 5;          // 最大重試次數
+    int delaySeconds = 5;        // 每次重試間隔時間
+
+    for (int i = 1; i <= retryCount; i++)
+    {
+        try
+        {
+            logger.LogInformation("正在檢查資料庫遷移狀態... (嘗試第 {Current}/{Max} 次)", i, retryCount);
+
+            // 檢查是否有未完成的遷移
+            if (context.Database.GetPendingMigrations().Any())
+            {
+                logger.LogInformation("偵測到未套用的遷移，開始執行資料庫遷移...");
+                context.Database.Migrate();
+                logger.LogInformation("資料庫遷移已成功完成！");
+            }
+            else
+            {
+                logger.LogInformation("資料庫已是最新狀態，無需遷移。");
+            }
+
+            isMigrationSuccessful = true;
+            break; // 成功則跳出循環
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning("第 {Current} 次資料庫遷移嘗試失敗。原因: {Message}", i, ex.Message);
+
+            if (i < retryCount)
+            {
+                logger.LogInformation("等待 {Delay} 秒後重新嘗試...", delaySeconds);
+                Thread.Sleep(TimeSpan.FromSeconds(delaySeconds));
+            }
+            else
+            {
+                logger.LogError(ex, "已達最大重試次數，資料庫自動遷移徹底失敗。");
+            }
+        }
+    }
+}
+
+// 現在外面就能讀取到 isMigrationSuccessful 了
+if (!isMigrationSuccessful)
+{
+    // 這裡使用常規的 Console 拋出異常，因為 scope 已經釋放，logger 無法安全使用
+    throw new Exception("Database migration failed after max retries. API handles shutdown.");
+}
 
 app.Run();

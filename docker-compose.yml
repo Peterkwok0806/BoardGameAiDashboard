@@ -1,0 +1,141 @@
+version: '3.8'
+
+services:
+  # ─────────────────────────────────────────────────────────────────────────
+  # API Gateway (Nginx Reverse Proxy)
+  # ─────────────────────────────────────────────────────────────────────────
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: boardgame_nginx
+    ports:
+      - "80:80"
+    depends_on:
+      api:
+        condition: service_healthy
+      frontend:
+        condition: service_started
+    networks:
+      - boardgame_network
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Backend (.NET 8 API)
+  # ─────────────────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: ./BoardGameAiDashboard
+      dockerfile: Dockerfile
+    container_name: boardgame_api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=BoardGameAiDb;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;
+      - Redis__Connection=redis:6379
+      - Qdrant__Endpoint=http://qdrant:6333
+      - Jwt__Secret=${JWT_SECRET}
+      - Jwt__Issuer=BoardGameAiDashboard
+      - Jwt__Audience=BoardGameAiDashboard
+      - Ollama__Endpoint=http://ollama:11434
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      qdrant:
+        condition: service_started
+    networks:
+      - boardgame_network
+    restart: unless-stopped
+    # Note: Port 8080 is NOT exposed externally - only accessible via Nginx
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Frontend (Angular 19 + Nginx)
+  # ─────────────────────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./DashboardFrontend
+      dockerfile: Dockerfile
+    container_name: boardgame_frontend
+    networks:
+      - boardgame_network
+    restart: unless-stopped
+    # Note: Port 80 is NOT exposed externally - only accessible via Nginx
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # SQL Server 2022
+  # ─────────────────────────────────────────────────────────────────────────
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: boardgame_sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SA_PASSWORD}
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - boardgame_sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$$SA_PASSWORD" -C -Q "SELECT 1" || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - boardgame_network
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Redis 7
+  # ─────────────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: boardgame_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - boardgame_redis_data:/data
+    networks:
+      - boardgame_network
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Qdrant Vector Database
+  # ─────────────────────────────────────────────────────────────────────────
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: boardgame_qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - boardgame_qdrant_data:/qdrant/storage
+    networks:
+      - boardgame_network
+    restart: unless-stopped
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Named Volumes (Persistent Data)
+# ─────────────────────────────────────────────────────────────────────────────
+volumes:
+  boardgame_sqlserver_data:
+    driver: local
+  boardgame_redis_data:
+    driver: local
+  boardgame_qdrant_data:
+    driver: local
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Networks
+# ─────────────────────────────────────────────────────────────────────────────
+networks:
+  boardgame_network:
+    driver: bridge

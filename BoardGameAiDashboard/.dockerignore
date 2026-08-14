@@ -1,0 +1,26 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Build outputs
+**/bin/
+**/obj/
+
+# IDE
+**/.vs/
+**/.vscode/
+**/*.user
+**/*.suo
+
+# Documentation
+**/*.md
+**/*.txt
+
+# Test projects
+**/TestQueryFilter/
+**/BoardGameAiDashboard.Tests/
+**/BoardGameAiDashboard.IntegrationTests/
+
+# Docker files (keep the Dockerfile in context but exclude docker-compose)
+docker-compose*.yml

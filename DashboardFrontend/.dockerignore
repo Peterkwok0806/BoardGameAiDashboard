@@ -1,0 +1,32 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Node modules (will be reinstalled in container)
+**/node_modules/
+
+# IDE
+**/.vs/
+**/.vscode/
+**/*.user
+**/*.suo
+
+# Angular specific
+**/e2e/
+**/src/**/*.spec.ts
+**/src/**/*.stories.ts
+**/coverage/
+**/.angular/
+
+# Build outputs
+**/dist/
+
+# Logs
+**/*.log
+**/npm-debug.log*
+**/yarn-error.log
+
+# OS files
+**/.DS_Store
+**/Thumbs.db
